@@ -8,6 +8,7 @@
 </head>
 <body>
 <script src="nav.js"></script>
+<script type="module" src="auth.js"></script>
 
 <div class="page-wrap">
 
@@ -91,7 +92,7 @@
           <input type="range" id="match-pct" min="0" max="15" step="0.5" value="3" oninput="syncSlider('match-pct','match-pct-val','%')">
           <span class="slider-val" id="match-pct-val">3%</span>
         </div>
-        <span class="hint">% of salary matched by employer</span>
+        <span class="hint">% of eligible contribution matched (100% = dollar-for-dollar)</span>
       </div>
 
       <div class="field">
@@ -100,7 +101,7 @@
           <input type="range" id="match-cap" min="0" max="15" step="0.5" value="6" oninput="syncSlider('match-cap','match-cap-val','%')">
           <span class="slider-val" id="match-cap-val">6%</span>
         </div>
-        <span class="hint">Match applies up to this % of your salary</span>
+        <span class="hint">Match only applies to your contributions up to this % of salary</span>
       </div>
 
     </div>
@@ -316,10 +317,13 @@ function recalc() {
     const age = currentAge + y;
 
     // year-start contributions
-    const yourContrib  = salary * contribPct + extraMonthly * 12;
-    const employerMatch= salary * Math.min(contribPct, matchCap) * matchPct / (matchPct === 0 ? 1 : 1);
-    // employer match: employer matches matchPct of your contribution up to matchCap of salary
-    const actualMatch  = Math.min(yourContrib, salary * matchCap) * matchPct;
+    const yourContrib = salary * contribPct + extraMonthly * 12;
+    // Employer match: they match (matchPct) of your contribution,
+    // but only on up to (matchCap) of your salary.
+    // e.g. 100% match up to 10% of salary -> actualMatch = salary * 10%
+    //      50% match up to 6% of salary   -> actualMatch = salary * 3%
+    const eligibleContrib = Math.min(salary * contribPct, salary * matchCap);
+    const actualMatch = eligibleContrib * matchPct;
 
     // add contributions at year start (simplified: mid-year)
     const totalAdded = yourContrib + actualMatch;
@@ -374,6 +378,59 @@ document.querySelectorAll('input[type=number]').forEach(el => {
 });
 
 recalc();
+</script>
+
+<script type="module">
+import { saveInputs, loadWhenReady, flashSaved } from "./userdata.js";
+
+const TOOL = "403b";
+const INPUT_IDS = ['current-bal','current-age','retire-age','salary','contrib-pct',
+                   'extra-monthly','match-pct','match-cap','return-rate','salary-growth','inflation'];
+
+// Load saved inputs when auth resolves
+loadWhenReady(TOOL, data => {
+  if (!data) return;
+  INPUT_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && data[id] !== undefined) {
+      el.value = data[id];
+      // sync slider labels
+      const labelMap = {
+        'contrib-pct': ['contrib-pct-val','%'],
+        'match-pct':   ['match-pct-val','%'],
+        'match-cap':   ['match-cap-val','%'],
+        'return-rate': ['return-rate-val','%'],
+        'salary-growth':['salary-growth-val','%'],
+        'inflation':   ['inflation-val','%'],
+      };
+      if (labelMap[id]) {
+        const label = document.getElementById(labelMap[id][0]);
+        if (label) label.textContent = data[id] + labelMap[id][1];
+      }
+    }
+  });
+  // re-run calc with loaded values
+  if (typeof recalc === 'function') recalc();
+});
+
+// Auto-save 1 second after last input change
+let saveTimer;
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    const data = {};
+    INPUT_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) data[id] = parseFloat(el.value) || 0;
+    });
+    await saveInputs(TOOL, data);
+    flashSaved();
+  }, 1000);
+}
+
+document.querySelectorAll('input[type=number], input[type=range]').forEach(el => {
+  el.addEventListener('input', scheduleSave);
+});
 </script>
 </body>
 </html>
