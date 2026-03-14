@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>403(b) Savings Calculator — Finance Tools</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<script src="nav.js"></script>
+<script type="module" src="auth.js"></script>
+
+<div class="page-wrap">
+
+  <div class="page-header">
+    <h1>403(b) Savings</h1>
+    <p>Project your retirement balance including contributions, employer match, and compounding growth.</p>
+  </div>
+
+  <!-- ── Metrics ── -->
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Balance at retirement</div>
+      <div class="metric-value green" id="m-final">$0</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total contributions</div>
+      <div class="metric-value" id="m-contribs">$0</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Employer match total</div>
+      <div class="metric-value" id="m-match">$0</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total growth</div>
+      <div class="metric-value blue" id="m-growth">$0</div>
+    </div>
+  </div>
+
+  <!-- ── Inputs ── -->
+  <div class="card">
+    <div class="card-title">Your situation</div>
+    <div class="field-grid">
+
+      <div class="field">
+        <label>Current balance ($)</label>
+        <input type="number" id="current-bal" value="12000" min="0" step="500">
+        <span class="hint">What's already in your 403(b)</span>
+      </div>
+
+      <div class="field">
+        <label>Current age</label>
+        <input type="number" id="current-age" value="32" min="18" max="80" step="1">
+      </div>
+
+      <div class="field">
+        <label>Retirement age</label>
+        <input type="number" id="retire-age" value="65" min="40" max="85" step="1">
+      </div>
+
+      <div class="field">
+        <label>Annual salary ($)</label>
+        <input type="number" id="salary" value="75000" min="0" step="1000">
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Contributions ── -->
+  <div class="card">
+    <div class="card-title">Contributions</div>
+    <div class="field-grid">
+
+      <div class="field">
+        <label>Your contribution rate</label>
+        <div class="slider-row">
+          <input type="range" id="contrib-pct" min="0" max="30" step="0.5" value="6" oninput="syncSlider('contrib-pct','contrib-pct-val','%')">
+          <span class="slider-val" id="contrib-pct-val">6%</span>
+        </div>
+        <span class="hint">% of annual salary</span>
+      </div>
+
+      <div class="field">
+        <label>Monthly addition (flat $)</label>
+        <input type="number" id="extra-monthly" value="0" min="0" step="50">
+        <span class="hint">Any extra monthly contribution beyond % above</span>
+      </div>
+
+      <div class="field">
+        <label>Employer match rate</label>
+        <div class="slider-row">
+          <input type="range" id="match-pct" min="0" max="15" step="0.5" value="3" oninput="syncSlider('match-pct','match-pct-val','%')">
+          <span class="slider-val" id="match-pct-val">3%</span>
+        </div>
+        <span class="hint">% of eligible contribution matched (100% = dollar-for-dollar)</span>
+      </div>
+
+      <div class="field">
+        <label>Employer match cap</label>
+        <div class="slider-row">
+          <input type="range" id="match-cap" min="0" max="15" step="0.5" value="6" oninput="syncSlider('match-cap','match-cap-val','%')">
+          <span class="slider-val" id="match-cap-val">6%</span>
+        </div>
+        <span class="hint">Match only applies to your contributions up to this % of salary</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Returns ── -->
+  <div class="card">
+    <div class="card-title">Growth assumptions</div>
+    <div class="field-grid">
+
+      <div class="field">
+        <label>Annual return rate</label>
+        <div class="slider-row">
+          <input type="range" id="return-rate" min="1" max="14" step="0.25" value="7" oninput="syncSlider('return-rate','return-rate-val','%')">
+          <span class="slider-val" id="return-rate-val">7%</span>
+        </div>
+        <span class="hint">Historical S&amp;P 500 average ~7% inflation-adj.</span>
+      </div>
+
+      <div class="field">
+        <label>Annual salary growth</label>
+        <div class="slider-row">
+          <input type="range" id="salary-growth" min="0" max="8" step="0.25" value="2" oninput="syncSlider('salary-growth','salary-growth-val','%')">
+          <span class="slider-val" id="salary-growth-val">2%</span>
+        </div>
+        <span class="hint">Used to grow your % contribution each year</span>
+      </div>
+
+      <div class="field">
+        <label>Inflation rate</label>
+        <div class="slider-row">
+          <input type="range" id="inflation" min="0" max="6" step="0.25" value="2.5" oninput="syncSlider('inflation','inflation-val','%')">
+          <span class="slider-val" id="inflation-val">2.5%</span>
+        </div>
+        <span class="hint">Used to show today's purchasing power equivalent</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Chart ── -->
+  <div class="card">
+    <div class="card-title">Balance over time</div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:#1D4ED8"></span>Total balance</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#BFDBFE"></span>Your contributions</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#86EFAC"></span>Employer match</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#FDE68A;border:1px solid #D97706"></span>Today's $ equivalent</span>
+    </div>
+    <div style="position:relative;width:100%;height:320px;">
+      <canvas id="growth-chart"></canvas>
+    </div>
+  </div>
+
+  <!-- ── Yearly breakdown ── -->
+  <div class="card">
+    <div class="card-title">Year-by-year breakdown</div>
+    <div class="schedule-wrap">
+      <table class="schedule-table">
+        <thead>
+          <tr>
+            <th>Age</th>
+            <th>Your contrib</th>
+            <th>Employer match</th>
+            <th>Growth</th>
+            <th>Balance</th>
+            <th>Today's $</th>
+          </tr>
+        </thead>
+        <tbody id="schedule-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ── helpers ──────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const fmt = n => '$' + Math.round(n).toLocaleString();
+const fmtK = n => n >= 1e6 ? '$' + (n/1e6).toFixed(2) + 'M' : '$' + Math.round(n/1000) + 'k';
+
+function syncSlider(sliderId, labelId, suffix) {
+  const v = parseFloat($(sliderId).value);
+  $(labelId).textContent = v + suffix;
+  recalc();
+}
+
+function get(id) { return parseFloat($(id).value) || 0; }
+
+// ── chart setup ──────────────────────────────────────────────────────────────
+let chart;
+
+function initChart(labels, totals, contribs, matches, todayDollar) {
+  const ctx = $('growth-chart').getContext('2d');
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Total balance',
+          data: totals,
+          borderColor: '#1D4ED8',
+          backgroundColor: 'rgba(29,78,216,0.08)',
+          borderWidth: 2.5,
+          pointRadius: 0,
+          fill: false,
+          tension: 0.3,
+          order: 1
+        },
+        {
+          label: "Your contributions",
+          data: contribs,
+          borderColor: '#93C5FD',
+          backgroundColor: 'rgba(147,197,253,0.25)',
+          borderWidth: 1.5,
+          borderDash: [4,3],
+          pointRadius: 0,
+          fill: true,
+          tension: 0.3,
+          order: 2
+        },
+        {
+          label: 'Employer match',
+          data: matches,
+          borderColor: '#4ADE80',
+          backgroundColor: 'rgba(74,222,128,0.15)',
+          borderWidth: 1.5,
+          borderDash: [4,3],
+          pointRadius: 0,
+          fill: true,
+          tension: 0.3,
+          order: 3
+        },
+        {
+          label: "Today's $ equiv",
+          data: todayDollar,
+          borderColor: '#D97706',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          borderDash: [2,4],
+          pointRadius: 0,
+          fill: false,
+          tension: 0.3,
+          order: 4
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => '  ' + ctx.dataset.label + ': ' + fmt(ctx.raw)
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { autoSkip: true, maxTicksLimit: 12, color: '#A09D95', font: { size: 11 } },
+          grid: { display: false }
+        },
+        y: {
+          ticks: {
+            color: '#A09D95',
+            font: { size: 11 },
+            callback: v => fmtK(v)
+          },
+          grid: { color: 'rgba(160,157,149,0.15)' }
+        }
+      }
+    }
+  });
+}
+
+// ── main calc ─────────────────────────────────────────────────────────────────
+function recalc() {
+  const currentBal   = get('current-bal');
+  const currentAge   = Math.round(get('current-age'));
+  const retireAge    = Math.round(get('retire-age'));
+  const salary0      = get('salary');
+  const contribPct   = get('contrib-pct') / 100;
+  const extraMonthly = get('extra-monthly');
+  const matchPct     = get('match-pct') / 100;
+  const matchCap     = get('match-cap') / 100;
+  const returnRate   = get('return-rate') / 100;
+  const salaryGrowth = get('salary-growth') / 100;
+  const inflation    = get('inflation') / 100;
+
+  const years = Math.max(retireAge - currentAge, 0);
+
+  // yearly simulation
+  let balance = currentBal;
+  let cumContrib = 0;
+  let cumMatch   = 0;
+
+  const labels = [];
+  const totals  = [];
+  const contribs= [];
+  const matches = [];
+  const todayDollar = [];
+  const rows    = [];
+
+  let salary = salary0;
+
+  for (let y = 0; y <= years; y++) {
+    const age = currentAge + y;
+
+    // year-start contributions
+    const yourContrib = salary * contribPct + extraMonthly * 12;
+    // Employer match: they match (matchPct) of your contribution,
+    // but only on up to (matchCap) of your salary.
+    // e.g. 100% match up to 10% of salary -> actualMatch = salary * 10%
+    //      50% match up to 6% of salary   -> actualMatch = salary * 3%
+    const eligibleContrib = Math.min(salary * contribPct, salary * matchCap);
+    const actualMatch = eligibleContrib * matchPct;
+
+    // add contributions at year start (simplified: mid-year)
+    const totalAdded = yourContrib + actualMatch;
+    balance = (balance + totalAdded / 2) * (1 + returnRate) + totalAdded / 2;
+
+    cumContrib += yourContrib;
+    cumMatch   += actualMatch;
+
+    const inflAdj = balance / Math.pow(1 + inflation, y);
+
+    labels.push('Age ' + age);
+    totals.push(Math.round(balance));
+    contribs.push(Math.round(currentBal + cumContrib));
+    matches.push(Math.round(currentBal + cumContrib + cumMatch));
+    todayDollar.push(Math.round(inflAdj));
+
+    rows.push({ age, yourContrib, actualMatch, growth: balance - currentBal - cumContrib - cumMatch, balance, inflAdj });
+
+    salary *= (1 + salaryGrowth);
+  }
+
+  // update metrics
+  const finalBalance = totals[totals.length - 1] || 0;
+  $('m-final').textContent   = fmt(finalBalance);
+  $('m-contribs').textContent= fmt(cumContrib);
+  $('m-match').textContent   = fmt(cumMatch);
+  $('m-growth').textContent  = fmt(Math.max(0, finalBalance - currentBal - cumContrib - cumMatch));
+
+  // update chart
+  initChart(labels, totals, contribs, matches, todayDollar);
+
+  // update table — show every year, but cap visible rows with scroll
+  const tbody = $('schedule-body');
+  tbody.innerHTML = '';
+  rows.forEach((r, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.age}</td>
+      <td>${fmt(r.yourContrib)}</td>
+      <td>${fmt(r.actualMatch)}</td>
+      <td>${fmt(Math.max(0, totals[i] - (i > 0 ? totals[i-1] : currentBal) - r.yourContrib - r.actualMatch))}</td>
+      <td>${fmt(totals[i])}</td>
+      <td>${fmt(todayDollar[i])}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ── wire all inputs to recalc ─────────────────────────────────────────────────
+document.querySelectorAll('input[type=number]').forEach(el => {
+  el.addEventListener('input', recalc);
+});
+
+recalc();
+</script>
+
+<script type="module">
+import { saveInputs, loadWhenReady, flashSaved } from "./userdata.js";
+
+const TOOL = "403b";
+const INPUT_IDS = ['current-bal','current-age','retire-age','salary','contrib-pct',
+                   'extra-monthly','match-pct','match-cap','return-rate','salary-growth','inflation'];
+
+// Load saved inputs when auth resolves
+loadWhenReady(TOOL, data => {
+  if (!data) return;
+  INPUT_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && data[id] !== undefined) {
+      el.value = data[id];
+      // sync slider labels
+      const labelMap = {
+        'contrib-pct': ['contrib-pct-val','%'],
+        'match-pct':   ['match-pct-val','%'],
+        'match-cap':   ['match-cap-val','%'],
+        'return-rate': ['return-rate-val','%'],
+        'salary-growth':['salary-growth-val','%'],
+        'inflation':   ['inflation-val','%'],
+      };
+      if (labelMap[id]) {
+        const label = document.getElementById(labelMap[id][0]);
+        if (label) label.textContent = data[id] + labelMap[id][1];
+      }
+    }
+  });
+  // re-run calc with loaded values
+  if (typeof recalc === 'function') recalc();
+});
+
+// Auto-save 1 second after last input change
+let saveTimer;
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    const data = {};
+    INPUT_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) data[id] = parseFloat(el.value) || 0;
+    });
+    await saveInputs(TOOL, data);
+    flashSaved();
+  }, 1000);
+}
+
+document.querySelectorAll('input[type=number], input[type=range]').forEach(el => {
+  el.addEventListener('input', scheduleSave);
+});
+</script>
+</body>
+</html>
