@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monthly Budget — Finance Tools</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .category-section { margin-bottom: 1.5rem; }
+    .category-section-title {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-3);
+      margin-bottom: 8px;
+    }
+    .budget-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--bg-inset);
+    }
+    .budget-row:last-child { border-bottom: none; }
+    .budget-row-label {
+      flex: 1;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .budget-row-input {
+      width: 120px;
+      height: 34px;
+      padding: 0 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      text-align: right;
+    }
+    .budget-row-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(29,78,216,0.1);
+    }
+    .budget-row-pct {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-3);
+      min-width: 42px;
+      text-align: right;
+    }
+    .summary-bar-wrap {
+      height: 10px;
+      background: var(--bg-inset);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .summary-bar {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.3s ease;
+    }
+    .income-status {
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius);
+      font-size: 13.5px;
+      font-weight: 500;
+      font-family: var(--font-mono);
+      margin-top: 0;
+    }
+    .income-status.surplus { background: var(--green-lt); color: var(--green); }
+    .income-status.deficit { background: var(--red-lt);   color: var(--red); }
+    .income-status.balanced { background: var(--amber-lt); color: var(--amber); }
+  </style>
+</head>
+<body>
+<script src="nav.js"></script>
+
+<div class="page-wrap">
+
+  <div class="page-header">
+    <h1>Monthly Budget</h1>
+    <p>Toggle the categories that apply to you, fill in your monthly amounts, and see exactly where your income goes.</p>
+  </div>
+
+  <!-- ── Income ── -->
+  <div class="card">
+    <div class="card-title">Monthly income</div>
+    <div class="field-grid">
+      <div class="field">
+        <label>Take-home pay (after tax)</label>
+        <input type="number" id="income-main" value="5500" min="0" step="100">
+      </div>
+      <div class="field">
+        <label>Secondary income</label>
+        <input type="number" id="income-secondary" value="0" min="0" step="100">
+        <span class="hint">Side gig, rental, etc.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Metrics ── -->
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Total income</div>
+      <div class="metric-value" id="m-income">$0</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total expenses</div>
+      <div class="metric-value" id="m-expenses">$0</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Remaining</div>
+      <div class="metric-value green" id="m-remaining">$0</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Savings rate</div>
+      <div class="metric-value blue" id="m-savings-rate">0%</div>
+    </div>
+  </div>
+
+  <!-- ── Status bar ── -->
+  <div id="status-bar" class="income-status surplus" style="margin-bottom:1rem;">
+    Budget status loading...
+  </div>
+
+  <!-- ── Category toggles ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">Toggle your spending categories</div>
+    <p style="font-size:13px;color:var(--text-2);margin-bottom:1rem;">Turn on the categories that apply. Each active category gets an input field below.</p>
+    <div id="toggle-container"></div>
+  </div>
+
+  <!-- ── Active category inputs ── -->
+  <div class="card" id="inputs-card">
+    <div class="card-title">Monthly amounts</div>
+    <div id="inputs-container">
+      <p style="font-size:13.5px;color:var(--text-3);font-style:italic;">Enable categories above to enter monthly amounts.</p>
+    </div>
+  </div>
+
+  <!-- ── Chart ── -->
+  <div class="card" id="chart-card" style="display:none;">
+    <div class="card-title">Spending breakdown</div>
+    <div style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:flex-start;">
+      <div style="position:relative;width:220px;height:220px;flex-shrink:0;">
+        <canvas id="budget-chart"></canvas>
+      </div>
+      <div id="chart-legend" style="flex:1;min-width:180px;padding-top:8px;"></div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const fmt = n => '$' + Math.round(n).toLocaleString();
+
+// ── Category definitions ──────────────────────────────────────────────────────
+const CATEGORY_GROUPS = [
+  {
+    group: 'Housing',
+    color: '#1D4ED8',
+    items: [
+      { id: 'rent',        label: 'Rent / Mortgage',      default: 1800, on: true },
+      { id: 'utilities',   label: 'Utilities',             default: 150,  on: true },
+      { id: 'internet',    label: 'Internet',              default: 60,   on: true },
+      { id: 'phone',       label: 'Phone',                 default: 80,   on: true },
+      { id: 'hoa',         label: 'HOA / Condo fees',      default: 0,    on: false },
+      { id: 'home-maint',  label: 'Home maintenance',      default: 100,  on: false },
+    ]
+  },
+  {
+    group: 'Transportation',
+    color: '#7C3AED',
+    items: [
+      { id: 'car-payment', label: 'Car payment',           default: 400,  on: true },
+      { id: 'car-ins',     label: 'Car insurance',         default: 150,  on: true },
+      { id: 'gas',         label: 'Gas / Charging',        default: 200,  on: true },
+      { id: 'parking',     label: 'Parking / Tolls',       default: 0,    on: false },
+      { id: 'transit',     label: 'Public transit',        default: 0,    on: false },
+      { id: 'rideshare',   label: 'Rideshare (Uber/Lyft)', default: 0,    on: false },
+    ]
+  },
+  {
+    group: 'Food & Drink',
+    color: '#059669',
+    items: [
+      { id: 'groceries',   label: 'Groceries',             default: 400,  on: true },
+      { id: 'dining-out',  label: 'Dining out',            default: 200,  on: true },
+      { id: 'coffee',      label: 'Coffee shops',          default: 50,   on: false },
+      { id: 'alcohol',     label: 'Alcohol / bars',        default: 0,    on: false },
+      { id: 'meal-kits',   label: 'Meal kits / delivery',  default: 0,    on: false },
+    ]
+  },
+  {
+    group: 'Health',
+    color: '#DC2626',
+    items: [
+      { id: 'health-ins',  label: 'Health insurance',      default: 200,  on: true },
+      { id: 'dental',      label: 'Dental / Vision',       default: 30,   on: false },
+      { id: 'prescriptions',label:'Prescriptions',         default: 30,   on: false },
+      { id: 'gym',         label: 'Gym / Fitness',         default: 50,   on: false },
+      { id: 'therapy',     label: 'Therapy / Counseling',  default: 0,    on: false },
+    ]
+  },
+  {
+    group: 'Savings & Debt',
+    color: '#B45309',
+    items: [
+      { id: 'emergency',   label: 'Emergency fund',        default: 200,  on: true },
+      { id: 'retirement',  label: '403(b) / 401(k)',       default: 300,  on: true },
+      { id: 'invest',      label: 'Brokerage / investing', default: 0,    on: false },
+      { id: 'cc-debt',     label: 'Credit card payment',   default: 0,    on: false },
+      { id: 'student-loan',label: 'Student loans',         default: 0,    on: false },
+      { id: 'other-debt',  label: 'Other debt payment',    default: 0,    on: false },
+    ]
+  },
+  {
+    group: 'Lifestyle',
+    color: '#0891B2',
+    items: [
+      { id: 'streaming',   label: 'Streaming / subscriptions', default: 50, on: true },
+      { id: 'clothing',    label: 'Clothing',              default: 100,  on: false },
+      { id: 'personal',    label: 'Personal care / beauty',default: 50,   on: false },
+      { id: 'gifts',       label: 'Gifts / donations',     default: 50,   on: false },
+      { id: 'entertainment',label:'Entertainment',         default: 100,  on: false },
+      { id: 'vacation',    label: 'Vacation / travel',     default: 0,    on: false },
+      { id: 'hobbies',     label: 'Hobbies',               default: 0,    on: false },
+      { id: 'childcare',   label: 'Childcare / school',    default: 0,    on: false },
+      { id: 'pets',        label: 'Pets',                  default: 0,    on: false },
+      { id: 'misc',        label: 'Miscellaneous',         default: 0,    on: false },
+    ]
+  }
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+const state = {};  // id → { on, value }
+
+CATEGORY_GROUPS.forEach(g => g.items.forEach(item => {
+  state[item.id] = { on: item.on, value: item.default };
+}));
+
+// ── Build toggle UI ────────────────────────────────────────────────────────────
+function buildToggles() {
+  const container = $('toggle-container');
+  container.innerHTML = '';
+  CATEGORY_GROUPS.forEach(g => {
+    const section = document.createElement('div');
+    section.className = 'category-section';
+    const title = document.createElement('div');
+    title.className = 'category-section-title';
+    title.textContent = g.group;
+    section.appendChild(title);
+
+    const pills = document.createElement('div');
+    pills.className = 'toggle-group';
+
+    g.items.forEach(item => {
+      const btn = document.createElement('button');
+      btn.className = 'toggle-pill' + (state[item.id].on ? ' on' : '');
+      btn.textContent = item.label;
+      btn.dataset.id = item.id;
+      btn.onclick = () => {
+        state[item.id].on = !state[item.id].on;
+        btn.classList.toggle('on', state[item.id].on);
+        buildInputs();
+        recalc();
+      };
+      pills.appendChild(btn);
+    });
+    section.appendChild(pills);
+    container.appendChild(section);
+  });
+}
+
+// ── Build inputs for active categories ────────────────────────────────────────
+function buildInputs() {
+  const container = $('inputs-container');
+  container.innerHTML = '';
+
+  let hasAny = false;
+  CATEGORY_GROUPS.forEach(g => {
+    const active = g.items.filter(i => state[i.id].on);
+    if (active.length === 0) return;
+    hasAny = true;
+
+    const section = document.createElement('div');
+    section.className = 'category-section';
+    const title = document.createElement('div');
+    title.className = 'category-section-title';
+    title.style.color = g.color;
+    title.textContent = g.group;
+    section.appendChild(title);
+
+    active.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'budget-row';
+
+      const label = document.createElement('div');
+      label.className = 'budget-row-label';
+      label.textContent = item.label;
+
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.className = 'budget-row-input';
+      input.min = '0';
+      input.step = '10';
+      input.value = state[item.id].value;
+      input.dataset.id = item.id;
+      input.addEventListener('input', () => {
+        state[item.id].value = parseFloat(input.value) || 0;
+        recalc();
+      });
+
+      const pct = document.createElement('div');
+      pct.className = 'budget-row-pct';
+      pct.id = 'pct-' + item.id;
+
+      row.appendChild(label);
+      row.appendChild(input);
+      row.appendChild(pct);
+      section.appendChild(row);
+    });
+
+    container.appendChild(section);
+  });
+
+  if (!hasAny) {
+    container.innerHTML = '<p style="font-size:13.5px;color:var(--text-3);font-style:italic;">Enable categories above to enter monthly amounts.</p>';
+  }
+}
+
+// ── Chart ─────────────────────────────────────────────────────────────────────
+let chart;
+
+function recalc() {
+  const income = (parseFloat($('income-main').value) || 0) + (parseFloat($('income-secondary').value) || 0);
+
+  // build group totals for chart
+  const groupTotals = CATEGORY_GROUPS.map(g => ({
+    group: g.group,
+    color: g.color,
+    total: g.items.filter(i => state[i.id].on).reduce((sum, i) => sum + state[i.id].value, 0)
+  })).filter(g => g.total > 0);
+
+  const totalExpenses = groupTotals.reduce((s, g) => s + g.total, 0);
+  const remaining     = income - totalExpenses;
+  const savingsRate   = income > 0 ? Math.round((remaining / income) * 100) : 0;
+
+  $('m-income').textContent       = fmt(income);
+  $('m-expenses').textContent     = fmt(totalExpenses);
+  $('m-remaining').textContent    = fmt(remaining);
+  $('m-remaining').className      = 'metric-value ' + (remaining >= 0 ? 'green' : 'red');
+  $('m-savings-rate').textContent = savingsRate + '%';
+
+  const bar = $('status-bar');
+  if (remaining > 50) {
+    bar.className = 'income-status surplus';
+    bar.textContent = '✓ Surplus of ' + fmt(remaining) + ' — you\'re spending less than you earn.';
+  } else if (remaining < -50) {
+    bar.className = 'income-status deficit';
+    bar.textContent = '⚠ Deficit of ' + fmt(Math.abs(remaining)) + ' — expenses exceed income.';
+  } else {
+    bar.className = 'income-status balanced';
+    bar.textContent = '≈ Roughly balanced — within $50 of your income.';
+  }
+
+  // update % labels
+  CATEGORY_GROUPS.forEach(g => g.items.forEach(item => {
+    const el = $('pct-' + item.id);
+    if (el && income > 0) {
+      el.textContent = Math.round((state[item.id].value / income) * 100) + '%';
+    }
+  }));
+
+  // chart
+  if (groupTotals.length > 0) {
+    $('chart-card').style.display = '';
+    const ctx = $('budget-chart').getContext('2d');
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: groupTotals.map(g => g.group),
+        datasets: [{
+          data: groupTotals.map(g => g.total),
+          backgroundColor: groupTotals.map(g => g.color),
+          borderWidth: 2,
+          borderColor: '#FAFAF7',
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '62%',
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: {
+            label: c => '  ' + fmt(c.raw) + ' (' + Math.round((c.raw/totalExpenses)*100) + '%)'
+          }}
+        }
+      }
+    });
+
+    // custom legend
+    const legendEl = $('chart-legend');
+    legendEl.innerHTML = '';
+    groupTotals.forEach(g => {
+      const pct = income > 0 ? Math.round((g.total / income) * 100) : 0;
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px;';
+      row.innerHTML = `
+        <span style="width:10px;height:10px;border-radius:2px;background:${g.color};flex-shrink:0;"></span>
+        <span style="flex:1;font-size:13px;color:var(--text)">${g.group}</span>
+        <span style="font-family:var(--font-mono);font-size:12.5px;color:var(--text-2)">${fmt(g.total)}</span>
+        <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-3);min-width:32px;text-align:right">${pct}%</span>
+      `;
+      legendEl.appendChild(row);
+    });
+    if (remaining > 0) {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:8px;margin-top:4px;padding-top:8px;border-top:1px solid var(--border)';
+      const pct = income > 0 ? Math.round((remaining/income)*100) : 0;
+      row.innerHTML = `
+        <span style="width:10px;height:10px;border-radius:2px;background:#D1FAE5;border:1px solid #6EE7B7;flex-shrink:0;"></span>
+        <span style="flex:1;font-size:13px;color:var(--text)">Remaining</span>
+        <span style="font-family:var(--font-mono);font-size:12.5px;color:var(--green)">${fmt(remaining)}</span>
+        <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-3);min-width:32px;text-align:right">${pct}%</span>
+      `;
+      legendEl.appendChild(row);
+    }
+  } else {
+    $('chart-card').style.display = 'none';
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+buildToggles();
+buildInputs();
+recalc();
+
+document.querySelectorAll('#income-main, #income-secondary').forEach(el => {
+  el.addEventListener('input', recalc);
+});
+</script>
+</body>
+</html>

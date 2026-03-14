@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mortgage Calculator — Finance Tools</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<script src="nav.js"></script>
+
+<div class="page-wrap">
+
+  <div class="page-header">
+    <h1>Mortgage Calculator</h1>
+    <p>Monthly payment, total interest, amortization schedule, and payoff comparison with extra payments or biweekly payments.</p>
+  </div>
+
+  <!-- ── Metrics ── -->
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Monthly payment</div>
+      <div class="metric-value green" id="m-payment">$0</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total interest</div>
+      <div class="metric-value" id="m-interest">$0</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total cost</div>
+      <div class="metric-value" id="m-total">$0</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Payoff date</div>
+      <div class="metric-value blue" id="m-payoff">—</div>
+    </div>
+  </div>
+
+  <!-- ── Loan inputs ── -->
+  <div class="card">
+    <div class="card-title">Loan details</div>
+    <div class="field-grid">
+
+      <div class="field">
+        <label>Home price ($)</label>
+        <input type="number" id="home-price" value="400000" min="0" step="5000">
+      </div>
+
+      <div class="field">
+        <label>Down payment ($)</label>
+        <input type="number" id="down-payment" value="80000" min="0" step="1000">
+        <span class="hint" id="down-pct-hint">20% of home price</span>
+      </div>
+
+      <div class="field">
+        <label>Annual interest rate</label>
+        <div class="slider-row">
+          <input type="range" id="mortgage-rate" min="2" max="12" step="0.05" value="6.75" oninput="syncSlider('mortgage-rate','mortgage-rate-val','%')">
+          <span class="slider-val" id="mortgage-rate-val">6.75%</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Loan term</label>
+        <select id="loan-term">
+          <option value="30" selected>30 years</option>
+          <option value="20">20 years</option>
+          <option value="15">15 years</option>
+          <option value="10">10 years</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Start month</label>
+        <input type="month" id="start-date" value="2025-01">
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Optional costs ── -->
+  <div class="card">
+    <div class="card-title">Monthly extras (optional)</div>
+    <div class="field-grid">
+
+      <div class="field">
+        <label>Property tax (annual $)</label>
+        <input type="number" id="prop-tax" value="5000" min="0" step="100">
+        <span class="hint">Added to monthly payment display</span>
+      </div>
+
+      <div class="field">
+        <label>Home insurance (annual $)</label>
+        <input type="number" id="insurance" value="1200" min="0" step="100">
+      </div>
+
+      <div class="field">
+        <label>PMI (annual $)</label>
+        <input type="number" id="pmi" value="0" min="0" step="100">
+        <span class="hint">Usually required if down &lt; 20%</span>
+      </div>
+
+      <div class="field">
+        <label>HOA (monthly $)</label>
+        <input type="number" id="hoa" value="0" min="0" step="25">
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Payment strategy ── -->
+  <div class="card">
+    <div class="card-title">Payment strategy</div>
+
+    <div style="margin-bottom:1rem;">
+      <div style="font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:8px;">Payment type</div>
+      <div class="toggle-group">
+        <button class="toggle-pill on" id="btn-standard" onclick="setStrategy('standard')">Standard monthly</button>
+        <button class="toggle-pill" id="btn-biweekly" onclick="setStrategy('biweekly')">Biweekly (half payment)</button>
+        <button class="toggle-pill" id="btn-extra" onclick="setStrategy('extra')">Extra monthly payment</button>
+      </div>
+    </div>
+
+    <div id="extra-field" style="display:none;">
+      <div class="field" style="max-width:260px;">
+        <label>Extra monthly principal ($)</label>
+        <input type="number" id="extra-payment" value="200" min="0" step="50">
+        <span class="hint">Applied directly to principal each month</span>
+      </div>
+    </div>
+
+    <!-- comparison summary -->
+    <div id="strategy-compare" style="display:none;margin-top:1rem;padding:1rem;background:var(--bg-inset);border-radius:var(--radius);">
+      <div style="font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:8px;">vs. standard monthly</div>
+      <div style="display:flex;gap:2rem;flex-wrap:wrap;">
+        <div><div style="font-size:11.5px;color:var(--text-3)">Interest saved</div><div style="font-family:var(--font-mono);font-weight:500;color:var(--green)" id="cmp-saved">—</div></div>
+        <div><div style="font-size:11.5px;color:var(--text-3)">Months saved</div><div style="font-family:var(--font-mono);font-weight:500;color:var(--accent)" id="cmp-months">—</div></div>
+        <div><div style="font-size:11.5px;color:var(--text-3)">Payoff date</div><div style="font-family:var(--font-mono);font-weight:500;" id="cmp-date">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Chart ── -->
+  <div class="card">
+    <div class="card-title">Balance over time</div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:#1D4ED8"></span>Remaining balance</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#BFDBFE"></span>Cumulative interest paid</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#4ADE80;border:1px solid #15803D"></span>Alternate strategy</span>
+    </div>
+    <div style="position:relative;width:100%;height:300px;">
+      <canvas id="mortgage-chart"></canvas>
+    </div>
+  </div>
+
+  <!-- ── Amortization ── -->
+  <div class="card">
+    <div class="card-title">Amortization schedule</div>
+    <div class="schedule-wrap">
+      <table class="schedule-table">
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th>Payment</th>
+            <th>Principal</th>
+            <th>Interest</th>
+            <th>Balance</th>
+          </tr>
+        </thead>
+        <tbody id="amort-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const fmt = n => '$' + Math.round(n).toLocaleString();
+const fmtK = n => n >= 1e6 ? '$' + (n/1e6).toFixed(2)+'M' : '$' + Math.round(n/1000)+'k';
+
+let strategy = 'standard';
+let chart;
+
+function syncSlider(sid, lid, sfx) {
+  $(lid).textContent = parseFloat($(sid).value) + sfx;
+  recalc();
+}
+
+function get(id) { return parseFloat($(id).value) || 0; }
+
+function setStrategy(s) {
+  strategy = s;
+  ['standard','biweekly','extra'].forEach(x => $('btn-'+x).classList.toggle('on', x===s));
+  $('extra-field').style.display = s === 'extra' ? '' : 'none';
+  $('strategy-compare').style.display = s !== 'standard' ? '' : 'none';
+  recalc();
+}
+
+function amortize(principal, monthlyRate, totalMonths, extraMonthly, biweekly) {
+  const labels = [], balances = [], cumInterest = [];
+  let bal = principal, cumInt = 0, month = 0;
+  const stdPayment = principal * monthlyRate / (1 - Math.pow(1 + monthlyRate, -totalMonths));
+
+  while (bal > 0.01 && month < totalMonths * 2) {
+    month++;
+    let payment = stdPayment;
+    if (biweekly) {
+      // biweekly = 26 half-payments/yr = 13 full payments/yr
+      // simulate as: every month pay stdPayment + stdPayment/12 extra
+      payment = stdPayment + stdPayment / 12;
+    } else {
+      payment += extraMonthly;
+    }
+    const intPart = bal * monthlyRate;
+    const prinPart = Math.min(payment - intPart, bal);
+    bal -= prinPart;
+    cumInt += intPart;
+    if (month % 12 === 0 || bal <= 0.01) {
+      labels.push('Yr ' + Math.ceil(month/12));
+      balances.push(Math.max(0, Math.round(bal)));
+      cumInterest.push(Math.round(cumInt));
+    }
+  }
+  return { labels, balances, cumInterest, months: month, totalInterest: cumInt };
+}
+
+function addMonths(dateStr, m) {
+  const [y, mo] = dateStr.split('-').map(Number);
+  const d = new Date(y, mo - 1 + m, 1);
+  return d.toLocaleString('default', { month: 'short', year: 'numeric' });
+}
+
+function recalc() {
+  const homePrice  = get('home-price');
+  const downPmt    = get('down-payment');
+  const principal  = Math.max(homePrice - downPmt, 0);
+  const annRate    = get('mortgage-rate') / 100;
+  const monthRate  = annRate / 12;
+  const termYears  = parseInt($('loan-term').value);
+  const termMonths = termYears * 12;
+  const propTax    = get('prop-tax') / 12;
+  const insurance  = get('insurance') / 12;
+  const pmi        = get('pmi') / 12;
+  const hoa        = get('hoa');
+  const extraPmt   = get('extra-payment');
+  const startDate  = $('start-date').value || '2025-01';
+
+  const downPct = homePrice > 0 ? ((downPmt / homePrice) * 100).toFixed(1) : 0;
+  $('down-pct-hint').textContent = downPct + '% of home price';
+
+  if (principal <= 0 || monthRate <= 0) return;
+
+  const stdPayment = principal * monthRate / (1 - Math.pow(1 + monthRate, -termMonths));
+  const extras = propTax + insurance + pmi + hoa;
+
+  // standard amortization
+  const std = amortize(principal, monthRate, termMonths, 0, false);
+
+  // update main metrics
+  $('m-payment').textContent = fmt(stdPayment + extras);
+  $('m-interest').textContent = fmt(std.totalInterest);
+  $('m-total').textContent = fmt(principal + std.totalInterest);
+  $('m-payoff').textContent = addMonths(startDate, std.months);
+
+  // alternate strategy
+  let alt = null;
+  if (strategy === 'biweekly') alt = amortize(principal, monthRate, termMonths, 0, true);
+  if (strategy === 'extra')    alt = amortize(principal, monthRate, termMonths, extraPmt, false);
+
+  if (alt) {
+    const saved = std.totalInterest - alt.totalInterest;
+    const monthsSaved = std.months - alt.months;
+    $('cmp-saved').textContent = fmt(saved);
+    $('cmp-months').textContent = monthsSaved + ' months';
+    $('cmp-date').textContent = addMonths(startDate, alt.months);
+  }
+
+  // chart
+  const ctx = $('mortgage-chart').getContext('2d');
+  if (chart) chart.destroy();
+  const datasets = [
+    {
+      label: 'Remaining balance',
+      data: std.balances,
+      borderColor: '#1D4ED8',
+      backgroundColor: 'rgba(29,78,216,0.07)',
+      borderWidth: 2.5,
+      pointRadius: 0,
+      fill: true,
+      tension: 0.3
+    },
+    {
+      label: 'Cumulative interest',
+      data: std.cumInterest,
+      borderColor: '#93C5FD',
+      backgroundColor: 'rgba(147,197,253,0.15)',
+      borderWidth: 1.5,
+      borderDash: [5,3],
+      pointRadius: 0,
+      fill: false,
+      tension: 0.3
+    }
+  ];
+  if (alt) {
+    datasets.push({
+      label: 'Alt balance',
+      data: alt.balances,
+      borderColor: '#4ADE80',
+      backgroundColor: 'transparent',
+      borderWidth: 2,
+      borderDash: [4,3],
+      pointRadius: 0,
+      fill: false,
+      tension: 0.3
+    });
+  }
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: std.labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode:'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => '  ' + c.dataset.label + ': ' + fmt(c.raw) } }
+      },
+      scales: {
+        x: { ticks: { autoSkip:true, maxTicksLimit:12, color:'#A09D95', font:{size:11} }, grid:{display:false} },
+        y: { ticks: { color:'#A09D95', font:{size:11}, callback: v => fmtK(v) }, grid:{color:'rgba(160,157,149,0.15)'} }
+      }
+    }
+  });
+
+  // amortization table (show month-by-month for first 2 years, then yearly)
+  const tbody = $('amort-body');
+  tbody.innerHTML = '';
+  let bal = principal, cumInt2 = 0, mo = 0;
+  const useExtra = strategy === 'extra' ? extraPmt : 0;
+  const useBiweekly = strategy === 'biweekly';
+  let monthPayment = stdPayment + (useBiweekly ? stdPayment/12 : useExtra);
+
+  while (bal > 0.01 && mo < termMonths * 2) {
+    mo++;
+    const intPart  = bal * monthRate;
+    const prinPart = Math.min(monthPayment - intPart, bal);
+    bal = Math.max(0, bal - prinPart);
+    cumInt2 += intPart;
+
+    const tr = document.createElement('tr');
+    const moLabel = addMonths(startDate, mo - 1);
+    tr.innerHTML = `
+      <td>${moLabel}</td>
+      <td>${fmt(monthPayment)}</td>
+      <td>${fmt(prinPart)}</td>
+      <td>${fmt(intPart)}</td>
+      <td>${fmt(bal)}</td>
+    `;
+    tbody.appendChild(tr);
+    if (bal <= 0.01) break;
+  }
+}
+
+document.querySelectorAll('input[type=number], input[type=month], select').forEach(el => {
+  el.addEventListener('input', recalc);
+});
+
+recalc();
+</script>
+</body>
+</html>

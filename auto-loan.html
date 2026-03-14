@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auto Loan Calculator — Finance Tools</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<script src="nav.js"></script>
+
+<div class="page-wrap">
+
+  <div class="page-header">
+    <h1>Auto Loan Calculator</h1>
+    <p>Monthly payment, total cost of ownership, and payoff acceleration with extra payments.</p>
+  </div>
+
+  <!-- ── Metrics ── -->
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Monthly payment</div>
+      <div class="metric-value green" id="m-payment">$0</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total interest</div>
+      <div class="metric-value" id="m-interest">$0</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total loan cost</div>
+      <div class="metric-value" id="m-total">$0</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">True cost of car</div>
+      <div class="metric-value blue" id="m-true-cost">$0</div>
+    </div>
+  </div>
+
+  <!-- ── Loan inputs ── -->
+  <div class="card">
+    <div class="card-title">Vehicle & loan</div>
+    <div class="field-grid">
+
+      <div class="field">
+        <label>Vehicle price ($)</label>
+        <input type="number" id="vehicle-price" value="35000" min="0" step="500">
+      </div>
+
+      <div class="field">
+        <label>Down payment ($)</label>
+        <input type="number" id="auto-down" value="5000" min="0" step="500">
+      </div>
+
+      <div class="field">
+        <label>Trade-in value ($)</label>
+        <input type="number" id="trade-in" value="0" min="0" step="500">
+      </div>
+
+      <div class="field">
+        <label>Sales tax (%)</label>
+        <div class="slider-row">
+          <input type="range" id="sales-tax" min="0" max="12" step="0.1" value="6.25" oninput="syncSlider('sales-tax','sales-tax-val','%')">
+          <span class="slider-val" id="sales-tax-val">6.25%</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Annual interest rate</label>
+        <div class="slider-row">
+          <input type="range" id="auto-rate" min="0" max="25" step="0.1" value="7.5" oninput="syncSlider('auto-rate','auto-rate-val','%')">
+          <span class="slider-val" id="auto-rate-val">7.5%</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Loan term</label>
+        <select id="auto-term">
+          <option value="24">24 months (2 yr)</option>
+          <option value="36">36 months (3 yr)</option>
+          <option value="48">48 months (4 yr)</option>
+          <option value="60" selected>60 months (5 yr)</option>
+          <option value="72">72 months (6 yr)</option>
+          <option value="84">84 months (7 yr)</option>
+        </select>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Ownership costs ── -->
+  <div class="card">
+    <div class="card-title">Ownership costs (optional)</div>
+    <div class="field-grid">
+
+      <div class="field">
+        <label>Annual insurance ($)</label>
+        <input type="number" id="auto-insurance" value="1800" min="0" step="100">
+      </div>
+
+      <div class="field">
+        <label>Annual maintenance ($)</label>
+        <input type="number" id="maintenance" value="800" min="0" step="100">
+      </div>
+
+      <div class="field">
+        <label>Annual fuel / charging ($)</label>
+        <input type="number" id="fuel" value="2400" min="0" step="100">
+      </div>
+
+      <div class="field">
+        <label>Annual registration / fees ($)</label>
+        <input type="number" id="reg-fees" value="300" min="0" step="50">
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Depreciation & extra payments ── -->
+  <div class="card">
+    <div class="card-title">Depreciation & extra payments</div>
+    <div class="field-grid">
+
+      <div class="field">
+        <label>Depreciation (year 1 %)</label>
+        <div class="slider-row">
+          <input type="range" id="depreciation" min="5" max="30" step="1" value="20" oninput="syncSlider('depreciation','depreciation-val','%')">
+          <span class="slider-val" id="depreciation-val">20%</span>
+        </div>
+        <span class="hint">New cars typically lose 15–25% in year 1</span>
+      </div>
+
+      <div class="field">
+        <label>Subsequent depreciation (%/yr)</label>
+        <div class="slider-row">
+          <input type="range" id="depr-ongoing" min="3" max="20" step="1" value="12" oninput="syncSlider('depr-ongoing','depr-ongoing-val','%')">
+          <span class="slider-val" id="depr-ongoing-val">12%</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Extra monthly payment ($)</label>
+        <input type="number" id="auto-extra" value="0" min="0" step="25">
+        <span class="hint">Applied to principal to pay off faster</span>
+      </div>
+
+    </div>
+
+    <!-- comparison -->
+    <div id="extra-compare" style="margin-top:1rem;padding:1rem;background:var(--bg-inset);border-radius:var(--radius);">
+      <div style="font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:8px;">With extra payment vs. standard</div>
+      <div style="display:flex;gap:2rem;flex-wrap:wrap;">
+        <div><div style="font-size:11.5px;color:var(--text-3)">Interest saved</div><div style="font-family:var(--font-mono);font-weight:500;color:var(--green)" id="cmp-saved">—</div></div>
+        <div><div style="font-size:11.5px;color:var(--text-3)">Months saved</div><div style="font-family:var(--font-mono);font-weight:500;color:var(--accent)" id="cmp-months">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Chart ── -->
+  <div class="card">
+    <div class="card-title">Loan balance vs. vehicle value</div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:#1D4ED8"></span>Loan balance</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#4ADE80;border:1px solid #15803D"></span>Vehicle value</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#FCA5A5;border:1px solid #B91C1C"></span>Underwater (owe &gt; value)</span>
+    </div>
+    <div style="position:relative;width:100%;height:280px;">
+      <canvas id="auto-chart"></canvas>
+    </div>
+  </div>
+
+  <!-- ── Schedule ── -->
+  <div class="card">
+    <div class="card-title">Payment schedule</div>
+    <div class="schedule-wrap">
+      <table class="schedule-table">
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th>Payment</th>
+            <th>Principal</th>
+            <th>Interest</th>
+            <th>Balance</th>
+            <th>Car value</th>
+          </tr>
+        </thead>
+        <tbody id="auto-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const fmt = n => '$' + Math.round(n).toLocaleString();
+const fmtK = n => n >= 1e6 ? '$'+(n/1e6).toFixed(2)+'M' : '$'+Math.round(n/1000)+'k';
+
+let chart;
+
+function syncSlider(sid, lid, sfx) {
+  $(lid).textContent = parseFloat($(sid).value) + sfx;
+  recalc();
+}
+
+function get(id) { return parseFloat($(id).value) || 0; }
+
+function recalc() {
+  const vehiclePrice  = get('vehicle-price');
+  const downPmt       = get('auto-down');
+  const tradeIn       = get('trade-in');
+  const salesTaxPct   = get('sales-tax') / 100;
+  const annRate       = get('auto-rate') / 100;
+  const monthRate     = annRate / 12;
+  const termMonths    = parseInt($('auto-term').value);
+  const insurance     = get('auto-insurance');
+  const maintenance   = get('maintenance');
+  const fuel          = get('fuel');
+  const regFees       = get('reg-fees');
+  const depr1         = get('depreciation') / 100;
+  const deprOngoing   = get('depr-ongoing') / 100;
+  const extraMonthly  = get('auto-extra');
+
+  const taxedPrice   = vehiclePrice * (1 + salesTaxPct);
+  const principal    = Math.max(taxedPrice - downPmt - tradeIn, 0);
+
+  if (principal <= 0 || monthRate <= 0) return;
+
+  const stdPayment = principal * monthRate / (1 - Math.pow(1 + monthRate, -termMonths));
+
+  // standard amortize
+  function amortize(extra) {
+    let bal = principal, cumInt = 0, mo = 0;
+    const payment = stdPayment + extra;
+    while (bal > 0.01 && mo < termMonths * 2) {
+      mo++;
+      const intPart = bal * monthRate;
+      const prinPart = Math.min(payment - intPart, bal);
+      bal = Math.max(0, bal - prinPart);
+      cumInt += intPart;
+    }
+    return { months: mo, totalInterest: cumInt };
+  }
+
+  const std = amortize(0);
+  const alt = extraMonthly > 0 ? amortize(extraMonthly) : null;
+
+  // true cost of ownership over loan term years
+  const loanYears = termMonths / 12;
+  const annualOwnership = insurance + maintenance + fuel + regFees;
+  const trueCost = vehiclePrice + std.totalInterest + annualOwnership * loanYears;
+
+  $('m-payment').textContent    = fmt(stdPayment);
+  $('m-interest').textContent   = fmt(std.totalInterest);
+  $('m-total').textContent      = fmt(principal + std.totalInterest);
+  $('m-true-cost').textContent  = fmt(trueCost);
+
+  // comparison panel
+  if (alt) {
+    $('cmp-saved').textContent  = fmt(std.totalInterest - alt.totalInterest);
+    $('cmp-months').textContent = (std.months - alt.months) + ' months';
+  } else {
+    $('cmp-saved').textContent  = '$0';
+    $('cmp-months').textContent = '0 months';
+  }
+
+  // build chart data month by month
+  const labels = [], balances = [], values = [], underwater = [];
+  let bal = principal, carVal = vehiclePrice;
+
+  for (let mo = 0; mo <= termMonths; mo++) {
+    if (mo > 0) {
+      const intPart = bal * monthRate;
+      const prinPart = Math.min(stdPayment - intPart, bal);
+      bal = Math.max(0, bal - prinPart);
+      // depreciation: year 1 monthly, then ongoing
+      const monthlyDepr = mo <= 12 ? depr1 / 12 : deprOngoing / 12;
+      carVal *= (1 - monthlyDepr);
+    }
+    if (mo % 3 === 0) {
+      labels.push('Mo ' + mo);
+      balances.push(Math.round(bal));
+      values.push(Math.round(carVal));
+      underwater.push(bal > carVal ? Math.round(bal - carVal) : 0);
+    }
+  }
+
+  const ctx = $('auto-chart').getContext('2d');
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label:'Loan balance', data:balances, borderColor:'#1D4ED8', backgroundColor:'rgba(29,78,216,0.07)', borderWidth:2.5, pointRadius:0, fill:true, tension:0.3 },
+        { label:'Vehicle value', data:values, borderColor:'#4ADE80', backgroundColor:'rgba(74,222,128,0.07)', borderWidth:2, pointRadius:0, fill:true, tension:0.3 },
+        { label:'Underwater amount', data:underwater, borderColor:'#F87171', backgroundColor:'rgba(248,113,113,0.15)', borderWidth:1.5, borderDash:[4,3], pointRadius:0, fill:true, tension:0.3 }
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: c=>'  '+c.dataset.label+': '+fmt(c.raw) } } },
+      scales:{
+        x:{ticks:{autoSkip:true,maxTicksLimit:12,color:'#A09D95',font:{size:11}},grid:{display:false}},
+        y:{ticks:{color:'#A09D95',font:{size:11},callback:v=>fmtK(v)},grid:{color:'rgba(160,157,149,0.15)'}}
+      }
+    }
+  });
+
+  // table
+  const tbody = $('auto-body');
+  tbody.innerHTML = '';
+  bal = principal;
+  let carV = vehiclePrice;
+  for (let mo = 1; mo <= termMonths; mo++) {
+    const intPart = bal * monthRate;
+    const payment = stdPayment + extraMonthly;
+    const prinPart = Math.min(payment - intPart, bal);
+    bal = Math.max(0, bal - prinPart);
+    const monthlyDepr = mo <= 12 ? depr1 / 12 : deprOngoing / 12;
+    carV *= (1 - monthlyDepr);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>Month ${mo}</td><td>${fmt(payment)}</td><td>${fmt(prinPart)}</td><td>${fmt(intPart)}</td><td>${fmt(bal)}</td><td>${fmt(carV)}</td>`;
+    tbody.appendChild(tr);
+    if (bal <= 0.01) break;
+  }
+}
+
+document.querySelectorAll('input[type=number],select').forEach(el => el.addEventListener('input', recalc));
+recalc();
+</script>
+</body>
+</html>
