@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>403(b) Guide — Finance Tools</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .guide-wrap { max-width: 720px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+    .guide-wrap h2 { font-family: var(--font-display); font-size: 24px; font-weight: 400; letter-spacing: -0.02em; color: var(--text); margin: 2.5rem 0 0.75rem; }
+    .guide-wrap h3 { font-size: 15px; font-weight: 500; color: var(--text); margin: 1.5rem 0 0.5rem; }
+    .guide-wrap p  { font-size: 14.5px; color: var(--text-2); line-height: 1.75; margin-bottom: 0.85rem; }
+    .guide-wrap ul, .guide-wrap ol { padding-left: 1.25rem; margin-bottom: 0.85rem; }
+    .guide-wrap li { font-size: 14.5px; color: var(--text-2); line-height: 1.75; margin-bottom: 4px; }
+    .guide-wrap strong { color: var(--text); font-weight: 500; }
+    .guide-wrap a { color: var(--accent); }
+    .callout { background: var(--accent-lt); border-left: 3px solid var(--accent); border-radius: 0 var(--radius) var(--radius) 0; padding: 0.85rem 1rem; margin: 1rem 0; }
+    .callout p { color: var(--accent-dk); margin: 0; font-size: 13.5px; }
+    .callout.warn { background: var(--amber-lt); border-color: var(--amber); }
+    .callout.warn p { color: var(--amber); }
+    .callout.good { background: var(--green-lt); border-color: var(--green); }
+    .callout.good p { color: var(--green); }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 0.75rem 0 0.5rem; }
+    .data-table th { text-align: left; padding: 7px 10px; font-weight: 500; color: var(--text-3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+    .data-table th:not(:first-child) { text-align: right; }
+    .data-table td { padding: 7px 10px; border-bottom: 1px solid var(--bg-inset); color: var(--text); font-family: var(--font-mono); font-size: 13px; }
+    .data-table td:first-child { font-family: var(--font-body); color: var(--text-2); }
+    .data-table td:not(:first-child) { text-align: right; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:nth-child(even) { background: var(--bg-inset); }
+    .source-note { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+    .faq-item { border-bottom: 1px solid var(--border); padding: 1rem 0; }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-q { font-size: 14.5px; font-weight: 500; color: var(--text); margin-bottom: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-a { font-size: 13.5px; color: var(--text-2); line-height: 1.7; }
+    .toc { background: var(--bg-inset); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin: 1.5rem 0 2rem; }
+    .toc-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); margin-bottom: 10px; }
+    .toc a { display: block; font-size: 13.5px; color: var(--accent); text-decoration: none; padding: 3px 0; }
+    .toc a:hover { text-decoration: underline; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-2); text-decoration: none; margin-bottom: 1.5rem; }
+    .back-link:hover { color: var(--text); }
+    @media (max-width: 600px) { .guide-wrap { padding: 1.5rem 1rem 3rem; } }
+  </style>
+</head>
+<body>
+<script src="nav.js"></script>
+<script type="module" src="auth.js"></script>
+
+<div class="guide-wrap">
+
+  <a href="403b.html" class="back-link">← Back to calculator</a>
+
+  <div style="margin-bottom:2rem;">
+    <p style="font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-3);margin-bottom:6px;">Complete guide</p>
+    <h1 style="font-family:var(--font-display);font-size:clamp(28px,4vw,40px);font-weight:400;letter-spacing:-0.02em;line-height:1.15;color:var(--text);margin-bottom:8px;">Understanding your 403(b)</h1>
+    <p style="font-size:15px;color:var(--text-2);font-weight:300;">How it works, how much to save, and how you compare to other Americans.</p>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-title">In this guide</div>
+    <a href="#what-is">What is a 403(b)?</a>
+    <a href="#how-it-works">How it works</a>
+    <a href="#contribution-limits">2025 contribution limits</a>
+    <a href="#benchmarks">How Americans are saving — the data</a>
+    <a href="#debt-context">Debt context by age</a>
+    <a href="#how-much">How much should you save?</a>
+    <a href="#tips">Practical tips</a>
+    <a href="#mistakes">Common mistakes</a>
+    <a href="#faq">FAQ</a>
+  </div>
+
+  <!-- What is a 403b -->
+  <h2 id="what-is">What is a 403(b)?</h2>
+  <p>A 403(b) is a tax-advantaged retirement savings plan offered by public schools, non-profit organizations, and some government employers. It works almost identically to a 401(k) — the main difference is who offers it. If you work at a hospital, university, school district, or non-profit, your workplace retirement plan is likely a 403(b).</p>
+  <p>Contributions are made pre-tax directly from your paycheck, which lowers your taxable income today. The money grows tax-deferred, meaning you don't pay taxes on gains until you withdraw in retirement — ideally when you're in a lower tax bracket.</p>
+  <p>Some employers also offer a <strong>Roth 403(b)</strong> option, where contributions are made after-tax. You don't get the upfront tax break, but withdrawals in retirement are completely tax-free — often the better choice if you expect to be in a higher bracket later.</p>
+
+  <!-- How it works -->
+  <h2 id="how-it-works">How it works</h2>
+  <h3>Pre-tax contributions</h3>
+  <p>Every paycheck, a percentage you choose gets deposited into your 403(b) before income taxes are calculated. If you earn $75,000 and contribute 6%, that's $4,500/year going into your account — and your taxable income drops to $70,500.</p>
+
+  <h3>Employer match</h3>
+  <p>Many employers match a portion of what you contribute. A common structure is "100% match up to 6% of salary" — meaning if you put in 6%, they put in another 6%. Some employers, like yours, offer a flat match regardless of your contribution. Either way, the match is free money and should be captured in full before anything else.</p>
+
+  <div class="callout good">
+    <p><strong>The match is the best investment you'll ever make.</strong> A 10% employer match is an immediate 100% return on that portion of your salary — no market can reliably beat that.</p>
+  </div>
+
+  <h3>Investment growth</h3>
+  <p>Once inside your 403(b), your money is invested in funds you choose — typically a mix of stock index funds, bond funds, and target-date funds. Over decades, compound growth turns modest contributions into substantial balances. The S&amp;P 500 has returned roughly 10% annually before inflation (about 7% inflation-adjusted) over the long run.</p>
+
+  <h3>Withdrawals</h3>
+  <p>You can begin taking withdrawals at age 59½ without penalty. Withdrawals are taxed as ordinary income. Required Minimum Distributions (RMDs) kick in at age 73, meaning you must withdraw a minimum amount each year whether you need it or not.</p>
+
+  <div class="callout warn">
+    <p>Withdrawing before 59½ triggers a 10% early withdrawal penalty on top of regular income tax — avoid this if at all possible.</p>
+  </div>
+
+  <!-- Contribution limits -->
+  <h2 id="contribution-limits">2025 contribution limits</h2>
+  <table class="data-table">
+    <thead><tr><th>Who</th><th>Annual limit</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Under age 50</td><td>$23,500</td><td>Standard limit</td></tr>
+      <tr><td>Age 50–59</td><td>$31,000</td><td>+$7,500 catch-up</td></tr>
+      <tr><td>Age 60–63</td><td>$34,750</td><td>+$11,250 "super catch-up" (SECURE 2.0)</td></tr>
+      <tr><td>Age 64+</td><td>$31,000</td><td>Back to standard catch-up</td></tr>
+      <tr><td>15-year rule (403b only)</td><td>Up to $3,000 extra</td><td>If 15+ yrs with same employer and avg < $5k/yr prior</td></tr>
+    </tbody>
+  </table>
+  <p class="source-note">Source: IRS Rev. Proc. 2024-25. Limits typically increase with inflation each year.</p>
+
+  <p>These limits cover your contributions only. Employer contributions are separate and do not count against your limit.</p>
+
+  <!-- Benchmarks -->
+  <h2 id="benchmarks">How Americans are saving — the data</h2>
+  <p>Here's the real picture of where Americans stand on retirement savings, using the most recent available data. A key thing to understand: <strong>averages are skewed upward by high earners</strong>. The median — the middle value — is a more honest reflection of where most people actually are.</p>
+
+  <h3>401(k) / 403(b) balances by age (2024–2025)</h3>
+  <div style="overflow-x:auto;">
+    <table class="data-table">
+      <thead><tr><th>Age group</th><th>Avg balance</th><th>Median balance</th><th>Fidelity target</th></tr></thead>
+      <tbody>
+        <tr><td>20s</td><td>$91,133</td><td>$34,225</td><td>1× salary</td></tr>
+        <tr><td>30s</td><td>$132,010</td><td>$48,900</td><td>2× salary</td></tr>
+        <tr><td>40s</td><td>$272,588</td><td>$100,065</td><td>3× salary</td></tr>
+        <tr><td>50s</td><td>$592,285</td><td>$252,850</td><td>6× salary</td></tr>
+        <tr><td>60s</td><td>$573,624</td><td>$210,724</td><td>8× salary</td></tr>
+        <tr><td>65+</td><td>$299,442</td><td>$87,725</td><td>10× salary</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="source-note">Sources: Empower Personal Dashboard (2025), Vanguard How America Saves (2025), Fidelity Q4 2025. Note that Empower figures include users of their financial dashboard who tend to be more financially engaged than average Americans.</p>
+
+  <div class="callout">
+    <p>The median balance drops sharply at 65+ because many retirees are actively drawing down their accounts, and many older Americans have little to no dedicated retirement savings.</p>
+  </div>
+
+  <h3>Contribution rates</h3>
+  <table class="data-table">
+    <thead><tr><th>Metric</th><th>Rate</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td>Avg employee contribution rate</td><td>7.7%</td><td>Vanguard 2025</td></tr>
+      <tr><td>Median employer match</td><td>4.0%</td><td>Vanguard 2025</td></tr>
+      <tr><td>Average employer match</td><td>4.6%</td><td>Vanguard 2025</td></tr>
+      <tr><td>Combined avg total savings rate</td><td>14.1%</td><td>Fidelity Q4 2024</td></tr>
+      <tr><td>% of workers who increased contributions</td><td>45%</td><td>Vanguard 2025 (vs 2023)</td></tr>
+      <tr><td>Households with no retirement savings</td><td>54%</td><td>Federal Reserve SCF 2023</td></tr>
+    </tbody>
+  </table>
+
+  <h3>The "magic number" myth</h3>
+  <p>Americans say they need <strong>$1.26 million</strong> to retire comfortably (Northwestern Mutual 2025). The median retirement savings for those aged 55–64 is <strong>$185,000</strong>. That gap is stark — and it's exactly why starting early and being consistent matters so much more than any single investment decision.</p>
+
+  <!-- Debt context -->
+  <h2 id="debt-context">Debt context by age group</h2>
+  <p>Debt competes directly with retirement savings. Here's where Americans stand on debt by generation, which affects how much is realistically available to save.</p>
+
+  <div style="overflow-x:auto;">
+    <table class="data-table">
+      <thead><tr><th>Generation</th><th>Avg total debt</th><th>Credit card</th><th>Student loan</th><th>Mortgage</th></tr></thead>
+      <tbody>
+        <tr><td>Gen Z (18–27)</td><td>$34,000</td><td>$3,493</td><td>$22,948</td><td>—</td></tr>
+        <tr><td>Millennials (28–43)</td><td>$132,280</td><td>$6,521</td><td>$33,926</td><td>$312,014</td></tr>
+        <tr><td>Gen X (44–59)</td><td>$157,556</td><td>$9,600</td><td>$44,240</td><td>$283,677</td></tr>
+        <tr><td>Baby Boomers (60–78)</td><td>$93,000</td><td>$6,642</td><td>$43,000</td><td>$190,000</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="source-note">Sources: Experian Consumer Debt Study June 2025; Self.inc / NY Fed 2025.</p>
+
+  <p>Gen X carries the most total debt of any generation and also has the least time before retirement — making their savings challenge the steepest. Millennials hold the highest average mortgage debt, reflecting recent home purchases at elevated prices and rates.</p>
+
+  <!-- How much -->
+  <h2 id="how-much">How much should you save?</h2>
+  <p>The most widely cited guidance is <strong>10–15% of gross income</strong>, including any employer match. Here's how to think about it in practice:</p>
+
+  <ul>
+    <li><strong>Minimum: capture the full employer match.</strong> If your employer matches 10% of salary, contribute at least enough to get that — it's the highest-return "investment" available to you.</li>
+    <li><strong>Target: 15% total</strong> (your contribution + employer match combined). At this rate, starting in your 20s or 30s, you're on track for a comfortable retirement.</li>
+    <li><strong>Catch-up: 20%+ if you're behind.</strong> If you're in your 40s or 50s with less than the benchmarks above, increasing contributions aggressively now can close a significant gap.</li>
+  </ul>
+
+  <h3>Fidelity's salary-multiple benchmarks</h3>
+  <table class="data-table">
+    <thead><tr><th>Age</th><th>Savings target</th><th>Example (on $75k salary)</th></tr></thead>
+    <tbody>
+      <tr><td>30</td><td>1× salary</td><td>$75,000</td></tr>
+      <tr><td>40</td><td>3× salary</td><td>$225,000</td></tr>
+      <tr><td>50</td><td>6× salary</td><td>$450,000</td></tr>
+      <tr><td>60</td><td>8× salary</td><td>$600,000</td></tr>
+      <tr><td>67</td><td>10× salary</td><td>$750,000</td></tr>
+    </tbody>
+  </table>
+  <p class="source-note">Source: Fidelity Investments retirement guidelines. Assumes retiring at 67 with a 45% income replacement target from savings.</p>
+
+  <!-- Tips -->
+  <h2 id="tips">Practical tips</h2>
+
+  <h3>Start early, increase gradually</h3>
+  <p>Time is the most powerful variable in retirement savings. $100/month at age 25 becomes roughly $350,000 by 65 at 7% growth. The same $100/month starting at 45 becomes only about $52,000. Start now at whatever rate you can, then increase by 1% each year — you'll rarely notice the difference in your paycheck.</p>
+
+  <h3>Use the calculator to find your number</h3>
+  <p>The most useful thing you can do right now is open the <a href="403b.html">403(b) calculator</a> and model your specific situation — your salary, current balance, employer match, and expected retirement age. A few minutes of input gives you a personalized projection that general advice can't match.</p>
+
+  <h3>Increase contributions after a raise</h3>
+  <p>When you get a salary increase, direct at least half of it toward your 403(b) before lifestyle expenses expand to fill the new income. This is the single most effective habit for long-term savings growth.</p>
+
+  <h3>Don't panic in market downturns</h3>
+  <p>Only 5.4% of Fidelity participants changed their asset mix during the volatile Q4 2025 — a wise majority. Retirement accounts have decades to recover. Selling during a downturn locks in losses permanently.</p>
+
+  <h3>Consider a Roth 403(b) if available</h3>
+  <p>If your employer offers a Roth option and you're earlier in your career (lower tax bracket now, likely higher later), the Roth is often the better choice. Tax-free withdrawals in retirement can be extremely valuable, especially if tax rates rise over time.</p>
+
+  <!-- Mistakes -->
+  <h2 id="mistakes">Common mistakes</h2>
+  <ul>
+    <li><strong>Not contributing enough to get the full match.</strong> This is leaving free money on the table — the single most common and costly retirement mistake.</li>
+    <li><strong>Cashing out when changing jobs.</strong> Taking a lump-sum payout when leaving an employer triggers taxes plus a 10% penalty. Always roll it over to an IRA or new employer's plan.</li>
+    <li><strong>Staying in the default investment.</strong> Many plans default new participants into a money market or stable value fund. Check that your contributions are actually invested in a diversified fund — ideally a low-cost target-date fund or index fund.</li>
+    <li><strong>Ignoring fees.</strong> A 1% higher expense ratio on your funds can cost you 20%+ of your final balance over 30 years. Look for index funds with expense ratios below 0.10%.</li>
+    <li><strong>Not increasing contributions over time.</strong> Starting at 3% and never adjusting is a common pattern. Set a calendar reminder to increase by 1% every January.</li>
+  </ul>
+
+  <!-- FAQ -->
+  <h2 id="faq">FAQ</h2>
+  <div style="margin-top:0.5rem;">
+
+    <div class="faq-item">
+      <div class="faq-q">What's the difference between a 403(b) and a 401(k)?</div>
+      <div class="faq-a">Functionally almost identical. The 403(b) is available to public schools, non-profits, and some government workers; the 401(k) is for private sector employers. Contribution limits, tax treatment, and investment rules are essentially the same. Some 403(b) plans have an additional "15-year rule" that allows extra contributions for long-tenured employees.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Can I contribute to both a 403(b) and an IRA?</div>
+      <div class="faq-a">Yes. Your 403(b) and IRA limits are separate. In 2025 you can contribute up to $23,500 to your 403(b) and an additional $7,000 ($8,000 if 50+) to a Traditional or Roth IRA — subject to income limits for the Roth IRA.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What happens to my 403(b) if I leave my job?</div>
+      <div class="faq-a">You have three options: leave it with your former employer's plan, roll it over to your new employer's plan, or roll it over to an IRA. Rolling to an IRA usually gives you the most investment options and lowest fees. Never take a cash distribution — you'll owe taxes plus a 10% penalty if under 59½.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">When can I start taking money out?</div>
+      <div class="faq-a">Penalty-free withdrawals begin at age 59½. Required Minimum Distributions (RMDs) must begin at age 73. If you retire or leave your job at 55 or older, you may be able to take distributions without the 10% penalty under the "Rule of 55."</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What if I'm behind on savings?</div>
+      <div class="faq-a">You're not alone — median savings for most age groups are significantly below recommended levels. The most impactful moves are: maximize your employer match immediately, use catch-up contributions if 50+, reduce high-interest debt that's competing with savings, and consider delaying retirement by a few years (each additional year of saving and not withdrawing has an outsized effect on final balances).</div>
+    </div>
+
+  </div>
+
+  <div style="margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);">
+    <p style="font-size:12px;color:var(--text-3);">Data sourced from Fidelity Q4 2025, Empower Personal Dashboard 2025, Vanguard How America Saves 2025, Federal Reserve Survey of Consumer Finances 2023, Experian Consumer Debt Study June 2025, and IRS Rev. Proc. 2024-25. This guide is for informational purposes only and does not constitute financial advice. Consult a financial advisor for guidance specific to your situation.</p>
+    <a href="403b.html" style="display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:500;color:var(--accent);text-decoration:none;margin-top:1rem;">← Back to the 403(b) calculator</a>
+  </div>
+
+</div>
+</body>
+</html>

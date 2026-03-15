@@ -17,6 +17,118 @@
     <p>Project your retirement balance including contributions, employer match, and compounding growth.</p>
   </div>
 
+  <!-- ── Insights & Benchmarks ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;" onclick="toggleInsights()">
+      <div>
+        <div class="card-title" style="margin-bottom:2px;">How do you compare? — US Benchmarks</div>
+        <div style="font-size:13px;color:var(--text-2);">Average & median retirement savings, debt, and contribution rates by age</div>
+      </div>
+      <span id="insights-chevron" style="font-size:18px;color:var(--text-3);transition:transform 0.2s;">▼</span>
+    </div>
+
+    <div id="insights-body" style="display:none;margin-top:1.5rem;">
+
+      <!-- Compare my balance -->
+      <div style="background:var(--bg-inset);border-radius:var(--radius);padding:1rem;margin-bottom:1.5rem;">
+        <div style="font-size:12px;font-weight:500;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">Your balance vs. your age group</div>
+        <div id="benchmark-compare" style="font-size:14px;color:var(--text-2);">Enter your current balance and age above to see how you compare.</div>
+      </div>
+
+      <!-- Savings by age table -->
+      <div style="margin-bottom:1.5rem;">
+        <div style="font-size:12px;font-weight:500;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">401(k) / 403(b) balances by age — 2025 (Vanguard / Empower)</div>
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border);">
+                <th style="text-align:left;padding:7px 10px;font-weight:500;color:var(--text-3);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Age group</th>
+                <th style="text-align:right;padding:7px 10px;font-weight:500;color:var(--text-3);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Avg balance</th>
+                <th style="text-align:right;padding:7px 10px;font-weight:500;color:var(--text-3);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Median balance</th>
+                <th style="text-align:right;padding:7px 10px;font-weight:500;color:var(--text-3);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Fidelity target</th>
+              </tr>
+            </thead>
+            <tbody id="benchmark-table-body">
+              <tr style="border-bottom:1px solid var(--bg-inset);"><td style="padding:7px 10px;color:var(--text);">20s</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$91,133</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$34,225</td><td style="padding:7px 10px;text-align:right;color:var(--text-3);font-family:var(--font-mono);">1× salary</td></tr>
+              <tr style="border-bottom:1px solid var(--bg-inset);background:var(--bg-inset);" id="row-30s"><td style="padding:7px 10px;color:var(--text);">30s</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$132,010</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$48,900</td><td style="padding:7px 10px;text-align:right;color:var(--text-3);font-family:var(--font-mono);">2× salary</td></tr>
+              <tr style="border-bottom:1px solid var(--bg-inset);"><td style="padding:7px 10px;color:var(--text);">40s</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$272,588</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$100,065</td><td style="padding:7px 10px;text-align:right;color:var(--text-3);font-family:var(--font-mono);">3× salary</td></tr>
+              <tr style="border-bottom:1px solid var(--bg-inset);background:var(--bg-inset);"><td style="padding:7px 10px;color:var(--text);">50s</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$592,285</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$252,850</td><td style="padding:7px 10px;text-align:right;color:var(--text-3);font-family:var(--font-mono);">6× salary</td></tr>
+              <tr style="border-bottom:1px solid var(--bg-inset);"><td style="padding:7px 10px;color:var(--text);">60s</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$573,624</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$210,724</td><td style="padding:7px 10px;text-align:right;color:var(--text-3);font-family:var(--font-mono);">8× salary</td></tr>
+              <tr><td style="padding:7px 10px;color:var(--text);">65+</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$299,442</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$87,725</td><td style="padding:7px 10px;text-align:right;color:var(--text-3);font-family:var(--font-mono);">10× salary</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:6px;">Sources: Empower (2025), Vanguard How America Saves (2025), Fidelity Q4 2025. Averages include Empower dashboard users who tend to be more financially engaged than the general population.</div>
+      </div>
+
+      <!-- Key stats grid -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px;margin-bottom:1.5rem;">
+        <div style="background:var(--bg-inset);border-radius:var(--radius);padding:0.85rem 1rem;">
+          <div style="font-size:11.5px;color:var(--text-3);margin-bottom:4px;">Avg employee contribution rate</div>
+          <div style="font-family:var(--font-mono);font-size:20px;font-weight:500;color:var(--accent);">7.7%</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:2px;">of salary — Vanguard 2025</div>
+        </div>
+        <div style="background:var(--bg-inset);border-radius:var(--radius);padding:0.85rem 1rem;">
+          <div style="font-size:11.5px;color:var(--text-3);margin-bottom:4px;">Avg employer match</div>
+          <div style="font-family:var(--font-mono);font-size:20px;font-weight:500;color:var(--accent);">4.6%</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:2px;">median is 4% — Vanguard 2025</div>
+        </div>
+        <div style="background:var(--bg-inset);border-radius:var(--radius);padding:0.85rem 1rem;">
+          <div style="font-size:11.5px;color:var(--text-3);margin-bottom:4px;">Experts recommend saving</div>
+          <div style="font-family:var(--font-mono);font-size:20px;font-weight:500;color:var(--green);">10–15%</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:2px;">of income incl. employer match</div>
+        </div>
+        <div style="background:var(--bg-inset);border-radius:var(--radius);padding:0.85rem 1rem;">
+          <div style="font-size:11.5px;color:var(--text-3);margin-bottom:4px;">Americans with no retirement savings</div>
+          <div style="font-family:var(--font-mono);font-size:20px;font-weight:500;color:var(--red);">54%</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:2px;">of households — Fed SCF 2023</div>
+        </div>
+      </div>
+
+      <!-- Debt context -->
+      <div style="margin-bottom:1.5rem;">
+        <div style="font-size:12px;font-weight:500;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">Average total consumer debt by generation — 2025 (Experian)</div>
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border);">
+                <th style="text-align:left;padding:7px 10px;font-weight:500;color:var(--text-3);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Generation</th>
+                <th style="text-align:right;padding:7px 10px;font-weight:500;color:var(--text-3);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Avg total debt</th>
+                <th style="text-align:right;padding:7px 10px;font-weight:500;color:var(--text-3);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Avg credit card</th>
+                <th style="text-align:right;padding:7px 10px;font-weight:500;color:var(--text-3);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Avg student loan</th>
+                <th style="text-align:right;padding:7px 10px;font-weight:500;color:var(--text-3);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Avg mortgage</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--bg-inset);"><td style="padding:7px 10px;color:var(--text);">Gen Z (18–27)</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$34,000</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$3,493</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$22,948</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">—</td></tr>
+              <tr style="border-bottom:1px solid var(--bg-inset);background:var(--bg-inset);"><td style="padding:7px 10px;color:var(--text);">Millennials (28–43)</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$132,280</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$6,521</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$33,926</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$312,014</td></tr>
+              <tr style="border-bottom:1px solid var(--bg-inset);"><td style="padding:7px 10px;color:var(--text);">Gen X (44–59)</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$157,556</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$9,600</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$44,240</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$283,677</td></tr>
+              <tr style="border-bottom:1px solid var(--bg-inset);background:var(--bg-inset);"><td style="padding:7px 10px;color:var(--text);">Boomers (60–78)</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$93,000</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$6,642</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$43,000</td><td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);">$190,000</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:6px;">Source: Experian Consumer Debt Study, June 2025. Self.inc / NY Fed analysis 2025.</div>
+      </div>
+
+      <!-- Tips -->
+      <div style="margin-bottom:1.25rem;">
+        <div style="font-size:12px;font-weight:500;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">Quick tips</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;gap:10px;font-size:13.5px;"><span style="color:var(--green);font-weight:500;flex-shrink:0;">✓</span><span style="color:var(--text);">Always contribute at least enough to get your full employer match — it's an immediate 100% return on that money.</span></div>
+          <div style="display:flex;gap:10px;font-size:13.5px;"><span style="color:var(--green);font-weight:500;flex-shrink:0;">✓</span><span style="color:var(--text);">The 2025 403(b) contribution limit is <strong>$23,500</strong> ($31,000 if you're 50+, up to $34,750 if ages 60–63).</span></div>
+          <div style="display:flex;gap:10px;font-size:13.5px;"><span style="color:var(--green);font-weight:500;flex-shrink:0;">✓</span><span style="color:var(--text);">Fidelity's rule of thumb: have <strong>1× your salary saved by 30</strong>, 3× by 40, 6× by 50, 8× by 60, 10× by 67.</span></div>
+          <div style="display:flex;gap:10px;font-size:13.5px;"><span style="color:var(--amber);font-weight:500;flex-shrink:0;">!</span><span style="color:var(--text);">Averages are skewed high by large accounts — median balances are roughly <strong>1/3 of the average</strong> and give a more realistic picture.</span></div>
+          <div style="display:flex;gap:10px;font-size:13.5px;"><span style="color:var(--amber);font-weight:500;flex-shrink:0;">!</span><span style="color:var(--text);">A 1% increase in your contribution rate on a $75k salary saves an extra ~$34,000 over 20 years at 7% growth.</span></div>
+        </div>
+      </div>
+
+      <a href="403b-guide.html" style="display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:500;color:var(--accent);text-decoration:none;padding:8px 14px;border:1px solid var(--accent-lt);border-radius:var(--radius);background:var(--accent-lt);">
+        Read the full 403(b) guide →
+      </a>
+
+    </div>
+  </div>
+
   <!-- ── Metrics ── -->
   <div class="metrics">
     <div class="metric">
@@ -89,19 +201,10 @@
       <div class="field">
         <label>Employer match rate</label>
         <div class="slider-row">
-          <input type="range" id="match-pct" min="0" max="15" step="0.5" value="3" oninput="syncSlider('match-pct','match-pct-val','%')">
-          <span class="slider-val" id="match-pct-val">3%</span>
+          <input type="range" id="match-pct" min="0" max="20" step="0.5" value="10" oninput="syncSlider('match-pct','match-pct-val','%')">
+          <span class="slider-val" id="match-pct-val">10%</span>
         </div>
-        <span class="hint">% of eligible contribution matched (100% = dollar-for-dollar)</span>
-      </div>
-
-      <div class="field">
-        <label>Employer match cap</label>
-        <div class="slider-row">
-          <input type="range" id="match-cap" min="0" max="15" step="0.5" value="6" oninput="syncSlider('match-cap','match-cap-val','%')">
-          <span class="slider-val" id="match-cap-val">6%</span>
-        </div>
-        <span class="hint">Match only applies to your contributions up to this % of salary</span>
+        <span class="hint">% of your annual salary contributed by your employer each year</span>
       </div>
 
     </div>
@@ -292,7 +395,6 @@ function recalc() {
   const contribPct   = get('contrib-pct') / 100;
   const extraMonthly = get('extra-monthly');
   const matchPct     = get('match-pct') / 100;
-  const matchCap     = get('match-cap') / 100;
   const returnRate   = get('return-rate') / 100;
   const salaryGrowth = get('salary-growth') / 100;
   const inflation    = get('inflation') / 100;
@@ -318,12 +420,8 @@ function recalc() {
 
     // year-start contributions
     const yourContrib = salary * contribPct + extraMonthly * 12;
-    // Employer match: they match (matchPct) of your contribution,
-    // but only on up to (matchCap) of your salary.
-    // e.g. 100% match up to 10% of salary -> actualMatch = salary * 10%
-    //      50% match up to 6% of salary   -> actualMatch = salary * 3%
-    const eligibleContrib = Math.min(salary * contribPct, salary * matchCap);
-    const actualMatch = eligibleContrib * matchPct;
+    // Employer match: flat % of annual salary, independent of your contribution
+    const actualMatch = salary * matchPct;
 
     // add contributions at year start (simplified: mid-year)
     const totalAdded = yourContrib + actualMatch;
@@ -378,6 +476,50 @@ document.querySelectorAll('input[type=number]').forEach(el => {
 });
 
 recalc();
+
+// ── Insights panel ────────────────────────────────────────────────────────────
+function toggleInsights() {
+  const body = document.getElementById('insights-body');
+  const chevron = document.getElementById('insights-chevron');
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : '';
+  chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+  if (!isOpen) updateBenchmarkCompare();
+}
+
+function updateBenchmarkCompare() {
+  const age = parseFloat(document.getElementById('current-age').value) || 0;
+  const bal = parseFloat(document.getElementById('current-bal').value) || 0;
+  const el  = document.getElementById('benchmark-compare');
+  if (!el) return;
+
+  const benchmarks = [
+    { min:20, max:29, avg:91133,  median:34225,  label:'20s' },
+    { min:30, max:39, avg:132010, median:48900,  label:'30s' },
+    { min:40, max:49, avg:272588, median:100065, label:'40s' },
+    { min:50, max:59, avg:592285, median:252850, label:'50s' },
+    { min:60, max:64, avg:573624, median:210724, label:'60s' },
+    { min:65, max:99, avg:299442, median:87725,  label:'65+' },
+  ];
+
+  const group = benchmarks.find(b => age >= b.min && age <= b.max);
+  if (!group || bal === 0) {
+    el.textContent = 'Enter your current balance and age in the calculator above to see a personalized comparison.';
+    el.style.color = 'var(--text-2)';
+    return;
+  }
+
+  const fmt = n => '$' + Math.round(n).toLocaleString();
+  const vsAvg    = bal >= group.avg    ? 'above' : 'below';
+  const vsMedian = bal >= group.median ? 'above' : 'below';
+  const pctAvg   = Math.round(Math.abs(bal - group.avg)    / group.avg    * 100);
+  const pctMed   = Math.round(Math.abs(bal - group.median) / group.median * 100);
+
+  const color = bal >= group.median ? 'var(--green)' : bal >= group.median * 0.5 ? 'var(--amber)' : 'var(--red)';
+  el.style.color = color;
+  el.innerHTML = `Your balance of <strong>${fmt(bal)}</strong> is <strong>${pctAvg}% ${vsAvg}</strong> the average for your age group (${fmt(group.avg)}) and <strong>${pctMed}% ${vsMedian}</strong> the median (${fmt(group.median)}). ${bal >= group.median ? 'You are ahead of more than half of Americans your age.' : 'Most Americans in their ' + group.label + ' are in a similar position — it is not too late to accelerate contributions.'}`;
+}
+
 </script>
 
 <script type="module">
@@ -385,7 +527,7 @@ import { saveInputs, loadWhenReady, flashSaved } from "./userdata.js";
 
 const TOOL = "403b";
 const INPUT_IDS = ['current-bal','current-age','retire-age','salary','contrib-pct',
-                   'extra-monthly','match-pct','match-cap','return-rate','salary-growth','inflation'];
+                   'extra-monthly','match-pct','return-rate','salary-growth','inflation'];
 
 // Load saved inputs when auth resolves
 loadWhenReady(TOOL, data => {
@@ -398,7 +540,6 @@ loadWhenReady(TOOL, data => {
       const labelMap = {
         'contrib-pct': ['contrib-pct-val','%'],
         'match-pct':   ['match-pct-val','%'],
-        'match-cap':   ['match-cap-val','%'],
         'return-rate': ['return-rate-val','%'],
         'salary-growth':['salary-growth-val','%'],
         'inflation':   ['inflation-val','%'],
