@@ -99,6 +99,117 @@
     </div>
   </div>
 
+  <!-- ── Home search ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;" onclick="toggleSearch()">
+      <div>
+        <div class="card-title" style="margin-bottom:2px;">Search for homes</div>
+        <div style="font-size:13px;color:var(--text-2);">Find listings that fit your budget and criteria</div>
+      </div>
+      <span id="search-chevron" style="font-size:18px;color:var(--text-3);transition:transform 0.2s;">▼</span>
+    </div>
+
+    <div id="search-body" style="display:none;margin-top:1.25rem;">
+
+      <div class="field-grid" style="margin-bottom:1.25rem;">
+
+        <div class="field">
+          <label>Zip code</label>
+          <input type="text" id="s-zip" placeholder="e.g. 02101" maxlength="5" style="height:38px;padding:0 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font-mono);font-size:13.5px;color:var(--text);outline:none;width:100%;">
+        </div>
+
+        <div class="field">
+          <label>Search radius</label>
+          <select id="s-radius" style="height:38px;padding:0 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font-body);font-size:13.5px;color:var(--text);outline:none;width:100%;">
+            <option value="1">1 mile</option>
+            <option value="2">2 miles</option>
+            <option value="5" selected>5 miles</option>
+            <option value="10">10 miles</option>
+            <option value="20">20 miles</option>
+            <option value="30">30 miles</option>
+            <option value="50">50 miles</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Home type</label>
+          <select id="s-type" style="height:38px;padding:0 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font-body);font-size:13.5px;color:var(--text);outline:none;width:100%;">
+            <option value="any">Any type</option>
+            <option value="house">House</option>
+            <option value="condo">Condo / Townhouse</option>
+            <option value="multi">Multi-family</option>
+            <option value="land">Land</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Min bedrooms</label>
+          <select id="s-beds" style="height:38px;padding:0 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font-body);font-size:13.5px;color:var(--text);outline:none;width:100%;">
+            <option value="0">Any</option>
+            <option value="1">1+</option>
+            <option value="2">2+</option>
+            <option value="3" selected>3+</option>
+            <option value="4">4+</option>
+            <option value="5">5+</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Min bathrooms</label>
+          <select id="s-baths" style="height:38px;padding:0 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font-body);font-size:13.5px;color:var(--text);outline:none;width:100%;">
+            <option value="0">Any</option>
+            <option value="1">1+</option>
+            <option value="2" selected>2+</option>
+            <option value="3">3+</option>
+            <option value="4">4+</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Min garage spaces</label>
+          <select id="s-garage" style="height:38px;padding:0 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font-body);font-size:13.5px;color:var(--text);outline:none;width:100%;">
+            <option value="0">Any / none</option>
+            <option value="1">1+</option>
+            <option value="2">2+</option>
+            <option value="3">3+</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Max price source toggle -->
+      <div style="margin-bottom:1.25rem;">
+        <div style="font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:8px;">Max price to use</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <button class="toggle-pill on" id="price-auto-btn" onclick="setPriceMode('auto')">From affordability estimate</button>
+          <button class="toggle-pill" id="price-manual-btn" onclick="setPriceMode('manual')">Enter manually</button>
+          <span id="price-display" style="font-family:var(--font-mono);font-size:13px;color:var(--text-2);"></span>
+        </div>
+        <div id="price-manual-field" style="display:none;margin-top:10px;max-width:200px;">
+          <input type="number" id="s-maxprice" placeholder="e.g. 450000" min="0" step="10000"
+            style="height:38px;padding:0 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font-mono);font-size:13.5px;color:var(--text);outline:none;width:100%;"
+            oninput="updatePriceDisplay()">
+        </div>
+      </div>
+
+      <!-- Search buttons -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button onclick="searchRedfin()" style="height:38px;padding:0 18px;background:#CC0000;color:#fff;border:none;border-radius:var(--radius);font-family:var(--font-body);font-size:13.5px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px;">
+          Search Redfin ↗
+        </button>
+        <button onclick="searchRealtor()" style="height:38px;padding:0 18px;background:#D9232D;color:#fff;border:none;border-radius:var(--radius);font-family:var(--font-body);font-size:13.5px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px;">
+          Search Realtor.com ↗
+        </button>
+        <button onclick="searchZillow()" style="height:38px;padding:0 18px;background:#006AFF;color:#fff;border:none;border-radius:var(--radius);font-family:var(--font-body);font-size:13.5px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px;">
+          Search Zillow ↗
+        </button>
+      </div>
+
+      <div id="search-warning" style="display:none;margin-top:10px;font-size:12.5px;color:var(--amber);"></div>
+
+    </div>
+  </div>
+
   <!-- ── Metrics ── -->
   <div class="metrics">
     <div class="metric">
@@ -259,6 +370,138 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
+
+
+// ── Home search ───────────────────────────────────────────────────────────────
+let priceMode = 'auto';
+
+function toggleSearch() {
+  const body = $('search-body');
+  const chevron = $('search-chevron');
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : '';
+  chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+  if (!isOpen) updatePriceDisplay();
+}
+
+function setPriceMode(mode) {
+  priceMode = mode;
+  $('price-auto-btn').classList.toggle('on', mode === 'auto');
+  $('price-manual-btn').classList.toggle('on', mode === 'manual');
+  $('price-manual-field').style.display = mode === 'manual' ? '' : 'none';
+  updatePriceDisplay();
+}
+
+function updatePriceDisplay() {
+  const display = $('price-display');
+  const maxPrice = getSearchMaxPrice();
+  display.textContent = maxPrice ? '→ ' + fmt(maxPrice) : '';
+}
+
+function getSearchMaxPrice() {
+  if (priceMode === 'manual') {
+    return parseFloat($('s-maxprice').value) || 0;
+  }
+  // pull from affordability estimate if available
+  const priceEl = $('pq-max-price');
+  if (priceEl) {
+    const val = parseFloat(priceEl.textContent.replace(/[$,]/g, ''));
+    return isNaN(val) ? 0 : val;
+  }
+  // fallback: use home-price field
+  return get('home-price');
+}
+
+function validateSearch() {
+  const zip = $('s-zip').value.trim();
+  const warn = $('search-warning');
+  if (!zip || zip.length < 5 || !/^\d{5}$/.test(zip)) {
+    warn.textContent = '⚠ Please enter a valid 5-digit zip code before searching.';
+    warn.style.display = '';
+    return false;
+  }
+  warn.style.display = 'none';
+  return true;
+}
+
+function searchRedfin() {
+  if (!validateSearch()) return;
+  const zip      = $('s-zip').value.trim();
+  const beds     = $('s-beds').value;
+  const baths    = $('s-baths').value;
+  const maxPrice = getSearchMaxPrice();
+  const radius   = $('s-radius').value;
+  const type     = $('s-type').value;
+
+  // Redfin URL structure
+  // /zipcode/{zip}/filter/min-beds={n},min-baths={n},max-price={n},radius={n}
+  let filter = [];
+  if (beds  > 0) filter.push('min-beds=' + beds);
+  if (baths > 0) filter.push('min-baths=' + baths);
+  if (maxPrice > 0) filter.push('max-price=' + Math.round(maxPrice));
+  filter.push('radius=' + radius);
+
+  // home type mapping for redfin
+  const typeMap = { house: 'property-type=house', condo: 'property-type=condo,townhouse', multi: 'property-type=multifamily' };
+  if (typeMap[type]) filter.push(typeMap[type]);
+
+  const url = 'https://www.redfin.com/zipcode/' + zip + '/filter/' + filter.join(',');
+  window.open(url, '_blank');
+}
+
+function searchRealtor() {
+  if (!validateSearch()) return;
+  const zip      = $('s-zip').value.trim();
+  const beds     = $('s-beds').value;
+  const baths    = $('s-baths').value;
+  const maxPrice = getSearchMaxPrice();
+  const radius   = $('s-radius').value;
+  const type     = $('s-type').value;
+
+  // Realtor.com URL structure
+  // /realestateandhomes-search/{zip}/type-{type}/beds-{n}/baths-{n}/price-na-{max}/radius-{n}
+  let path = '/realestateandhomes-search/' + zip;
+
+  const typeMap = { house: 'single_family', condo: 'condos,townhomes', multi: 'multi_family', land: 'land' };
+  if (typeMap[type]) path += '/type-' + typeMap[type];
+  if (beds > 0)      path += '/beds-' + beds;
+  if (baths > 0)     path += '/baths-' + baths;
+  if (maxPrice > 0)  path += '/price-na-' + Math.round(maxPrice);
+  path += '/radius-' + radius;
+
+  window.open('https://www.realtor.com' + path, '_blank');
+}
+
+function searchZillow() {
+  if (!validateSearch()) return;
+  const zip      = $('s-zip').value.trim();
+  const beds     = $('s-beds').value;
+  const baths    = $('s-baths').value;
+  const maxPrice = getSearchMaxPrice();
+  const type     = $('s-type').value;
+
+  // Zillow uses a search URL with query params
+  const params = new URLSearchParams();
+  if (maxPrice > 0) params.set('searchQueryState', JSON.stringify({
+    pagination: {},
+    isMapVisible: true,
+    filterState: {
+      price: { max: Math.round(maxPrice) },
+      beds:  beds  > 0 ? { min: parseInt(beds)  } : undefined,
+      baths: baths > 0 ? { min: parseInt(baths) } : undefined,
+    }
+  }));
+
+  // Zillow's simplest reliable URL — zip search with price filter in the path
+  let url = 'https://www.zillow.com/homes/for_sale/' + zip + '/';
+  const filters = [];
+  if (maxPrice > 0) filters.push(Math.round(maxPrice) + '_price');
+  if (beds > 0)     filters.push(beds + '-_beds');
+  if (baths > 0)    filters.push(baths + '-_baths');
+  if (filters.length) url += filters.join('_') + '/';
+
+  window.open(url, '_blank');
+}
 
 // ── Pre-qualification calculator ──────────────────────────────────────────────
 function togglePrequal() {
