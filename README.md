@@ -7,7 +7,7 @@ A personal collection of client-side financial calculators. No backend, no accou
 | Page | File | Description |
 |------|------|-------------|
 | Home | `index.html` | Dashboard with links to all tools |
-| 403(b) Savings | `403b.html` | Retirement balance projector with employer match, monthly contributions, salary growth, and inflation adjustment |
+| Retirement Savings | `retirement.html` | Retirement balance projector with employer match, monthly contributions, salary growth, and inflation adjustment |
 | Mortgage | `mortgage.html` | Payment calculator with amortization schedule, biweekly and extra payment comparisons |
 | Auto Loan | `auto-loan.html` | Loan payoff with depreciation curve, underwater tracking, and total cost of ownership |
 | Monthly Budget | `budget.html` | Toggleable spending categories across 6 groups, with live surplus/deficit status and doughnut chart |
@@ -35,7 +35,7 @@ open index.html   # macOS
 ```
 finance-tools/
 ├── index.html        # Homepage
-├── 403b.html         # Retirement calculator
+├── retirement.html         # Retirement calculator
 ├── mortgage.html     # Mortgage calculator
 ├── auto-loan.html    # Auto loan calculator
 ├── budget.html       # Monthly budget tracker
