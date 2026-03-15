@@ -1,6 +1,6 @@
 # Finance Tools
 
-A personal collection of client-side financial calculators. No backend, no accounts, no ads — just open the files in a browser or host them as a static site.
+A personal collection of client-side financial calculators. No backend, no accounts, no ads — just open the files in a browser or host them as a static site. Or click here: https://nickt1133.github.io/finance-tools/
 
 ## Tools
 
