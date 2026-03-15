@@ -79,6 +79,7 @@
 </head>
 <body>
 <script src="nav.js"></script>
+<script type="module" src="auth.js"></script>
 
 <div class="page-wrap">
 
@@ -448,6 +449,59 @@ recalc();
 
 document.querySelectorAll('#income-main, #income-secondary').forEach(el => {
   el.addEventListener('input', recalc);
+});
+</script>
+
+<script type="module">
+import { saveInputs, loadWhenReady, flashSaved } from "./userdata.js";
+
+const TOOL = "budget";
+
+// Load saved budget state
+loadWhenReady(TOOL, data => {
+  if (!data) return;
+
+  // restore income
+  if (data.incomeMain !== undefined) document.getElementById('income-main').value = data.incomeMain;
+  if (data.incomeSecondary !== undefined) document.getElementById('income-secondary').value = data.incomeSecondary;
+
+  // restore category state
+  if (data.categories) {
+    Object.entries(data.categories).forEach(([id, val]) => {
+      if (state[id] !== undefined) {
+        state[id].on    = val.on;
+        state[id].value = val.value;
+      }
+    });
+  }
+
+  // rebuild UI with loaded state
+  buildToggles();
+  buildInputs();
+  recalc();
+});
+
+// Auto-save
+let saveTimer;
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    const categories = {};
+    Object.entries(state).forEach(([id, val]) => { categories[id] = { on: val.on, value: val.value }; });
+    await saveInputs(TOOL, {
+      incomeMain:      parseFloat(document.getElementById('income-main').value) || 0,
+      incomeSecondary: parseFloat(document.getElementById('income-secondary').value) || 0,
+      categories
+    });
+    flashSaved();
+  }, 1000);
+}
+
+// Hook into state changes — patch toggle and input listeners to also save
+document.addEventListener('input', scheduleSave);
+// Also save when toggles are clicked (they don't fire 'input')
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('toggle-pill')) scheduleSave();
 });
 </script>
 </body>

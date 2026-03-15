@@ -8,6 +8,7 @@
 </head>
 <body>
 <script src="nav.js"></script>
+<script type="module" src="auth.js"></script>
 
 <div class="page-wrap">
 
@@ -329,6 +330,40 @@ function recalc() {
 
 document.querySelectorAll('input[type=number],select').forEach(el => el.addEventListener('input', recalc));
 recalc();
+</script>
+
+<script type="module">
+import { saveInputs, loadWhenReady, flashSaved } from "./userdata.js";
+
+const TOOL = "auto-loan";
+const INPUT_IDS = ['vehicle-price','auto-down','trade-in','sales-tax','auto-rate','auto-insurance','maintenance','fuel','reg-fees','depreciation','depr-ongoing','auto-extra'];
+const SELECT_IDS = ['auto-term'];
+
+loadWhenReady(TOOL, data => {
+  if (!data) return;
+  INPUT_IDS.forEach(id => { const el = document.getElementById(id); if (el && data[id] !== undefined) el.value = data[id]; });
+  SELECT_IDS.forEach(id => { const el = document.getElementById(id); if (el && data[id] !== undefined) el.value = data[id]; });
+  const sliders = { 'sales-tax': 'sales-tax-val', 'auto-rate': 'auto-rate-val', 'depreciation': 'depreciation-val', 'depr-ongoing': 'depr-ongoing-val' };
+  Object.entries(sliders).forEach(([sid, lid]) => {
+    const label = document.getElementById(lid);
+    if (label && data[sid] !== undefined) label.textContent = data[sid] + '%';
+  });
+  if (typeof recalc === 'function') recalc();
+});
+
+let saveTimer;
+document.querySelectorAll('input, select').forEach(el => {
+  el.addEventListener('input', () => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(async () => {
+      const data = {};
+      INPUT_IDS.forEach(id => { const el = document.getElementById(id); if (el) data[id] = el.value; });
+      SELECT_IDS.forEach(id => { const el = document.getElementById(id); if (el) data[id] = el.value; });
+      await saveInputs(TOOL, data);
+      flashSaved();
+    }, 1000);
+  });
+});
 </script>
 </body>
 </html>

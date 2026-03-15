@@ -8,6 +8,7 @@
 </head>
 <body>
 <script src="nav.js"></script>
+<script type="module" src="auth.js"></script>
 
 <div class="page-wrap">
 
@@ -367,6 +368,43 @@ document.querySelectorAll('input[type=number], input[type=month], select').forEa
 });
 
 recalc();
+</script>
+
+<script type="module">
+import { saveInputs, loadWhenReady, flashSaved } from "./userdata.js";
+
+const TOOL = "mortgage";
+const INPUT_IDS = ['home-price','down-payment','mortgage-rate','prop-tax','insurance','pmi','hoa','extra-payment','start-date'];
+const SELECT_IDS = ['loan-term'];
+
+loadWhenReady(TOOL, data => {
+  if (!data) return;
+  INPUT_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && data[id] !== undefined) el.value = data[id];
+  });
+  SELECT_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && data[id] !== undefined) el.value = data[id];
+  });
+  const rateLabel = document.getElementById('mortgage-rate-val');
+  if (rateLabel && data['mortgage-rate']) rateLabel.textContent = data['mortgage-rate'] + '%';
+  if (typeof recalc === 'function') recalc();
+});
+
+let saveTimer;
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    const data = {};
+    INPUT_IDS.forEach(id => { const el = document.getElementById(id); if (el) data[id] = el.value; });
+    SELECT_IDS.forEach(id => { const el = document.getElementById(id); if (el) data[id] = el.value; });
+    await saveInputs(TOOL, data);
+    flashSaved();
+  }, 1000);
+}
+
+document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', scheduleSave));
 </script>
 </body>
 </html>
