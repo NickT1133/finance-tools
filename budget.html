@@ -8,73 +8,63 @@
   <style>
     .category-section { margin-bottom: 1.5rem; }
     .category-section-title {
-      font-size: 11px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-3);
-      margin-bottom: 8px;
+      font-size: 11px; font-weight: 500; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--text-3); margin-bottom: 8px;
     }
     .budget-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 0;
-      border-bottom: 1px solid var(--bg-inset);
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 0; border-bottom: 1px solid var(--bg-inset);
     }
     .budget-row:last-child { border-bottom: none; }
-    .budget-row-label {
-      flex: 1;
-      font-size: 14px;
-      color: var(--text);
-    }
+    .budget-row-label { flex: 1; font-size: 14px; color: var(--text); }
     .budget-row-input {
-      width: 120px;
-      height: 34px;
-      padding: 0 10px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      font-family: var(--font-mono);
-      font-size: 13px;
-      color: var(--text);
-      outline: none;
-      text-align: right;
+      width: 110px; height: 34px; padding: 0 10px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius); font-family: var(--font-mono);
+      font-size: 13px; color: var(--text); outline: none; text-align: right;
     }
     .budget-row-input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(29,78,216,0.1);
+      border-color: var(--accent); box-shadow: 0 0 0 3px rgba(29,78,216,0.1);
     }
     .budget-row-pct {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--text-3);
-      min-width: 42px;
-      text-align: right;
-    }
-    .summary-bar-wrap {
-      height: 10px;
-      background: var(--bg-inset);
-      border-radius: 99px;
-      overflow: hidden;
-      margin-top: 6px;
-    }
-    .summary-bar {
-      height: 100%;
-      border-radius: 99px;
-      transition: width 0.3s ease;
+      font-family: var(--font-mono); font-size: 12px;
+      color: var(--text-3); min-width: 38px; text-align: right;
     }
     .income-status {
-      padding: 0.85rem 1rem;
-      border-radius: var(--radius);
-      font-size: 13.5px;
-      font-weight: 500;
-      font-family: var(--font-mono);
-      margin-top: 0;
+      padding: 0.85rem 1rem; border-radius: var(--radius);
+      font-size: 13.5px; font-weight: 500; font-family: var(--font-mono);
     }
-    .income-status.surplus { background: var(--green-lt); color: var(--green); }
-    .income-status.deficit { background: var(--red-lt);   color: var(--red); }
+    .income-status.surplus  { background: var(--green-lt); color: var(--green); }
+    .income-status.deficit  { background: var(--red-lt);   color: var(--red); }
     .income-status.balanced { background: var(--amber-lt); color: var(--amber); }
+    .contrib-bar-wrap { height: 6px; background: var(--bg-inset); border-radius: 99px; overflow: hidden; margin-top: 6px; display: flex; }
+    .contrib-bar-p1 { height: 100%; background: var(--accent); transition: width 0.3s; }
+    .contrib-bar-p2 { height: 100%; background: #7C3AED; transition: width 0.3s; }
+    .personal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .personal-col-header {
+      font-size: 11px; font-weight: 500; text-transform: uppercase;
+      letter-spacing: 0.06em; margin-bottom: 8px; padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    .personal-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--bg-inset);
+      font-size: 13.5px; color: var(--text);
+    }
+    .personal-row:last-child { border-bottom: none; }
+    .personal-row input {
+      width: 90px; height: 32px; padding: 0 8px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius); font-family: var(--font-mono);
+      font-size: 13px; color: var(--text); outline: none; text-align: right;
+    }
+    .personal-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(29,78,216,0.1); }
+    .name-input {
+      border: none; background: transparent; font-size: 12px; font-weight: 500;
+      color: var(--text-2); outline: none; width: 100%; letter-spacing: 0.02em;
+      cursor: text; font-family: var(--font-body);
+    }
+    .name-input:focus { color: var(--text); border-bottom: 1px solid var(--accent); }
   </style>
 </head>
 <body>
@@ -85,30 +75,46 @@
 
   <div class="page-header">
     <h1>Monthly Budget</h1>
-    <p>Toggle the categories that apply to you, fill in your monthly amounts, and see exactly where your income goes.</p>
+    <p>Toggle the categories that apply, fill in your monthly amounts, and see exactly where your income goes.</p>
   </div>
 
-  <!-- ── Income ── -->
-  <div class="card">
-    <div class="card-title">Monthly income</div>
-    <div class="field-grid">
-      <div class="field">
-        <label>Take-home pay (after tax)</label>
-        <input type="number" id="income-main" value="5500" min="0" step="100">
+  <!-- mode toggle -->
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;">
+    <span style="font-size:13px;color:var(--text-2);">Budget mode:</span>
+    <button class="toggle-pill on" id="mode-single" onclick="setMode('single')">Individual</button>
+    <button class="toggle-pill"   id="mode-dual"   onclick="setMode('dual')">Combined (2 people)</button>
+  </div>
+
+  <!-- income card -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title" id="income-card-title">Monthly income</div>
+    <div class="field-grid" id="income-fields"></div>
+    <div id="contrib-section" style="display:none;margin-top:1rem;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+        <span style="color:var(--accent);font-weight:500;" id="contrib-p1-label">Person 1 — 0%</span>
+        <span style="color:#7C3AED;font-weight:500;"       id="contrib-p2-label">Person 2 — 0%</span>
       </div>
-      <div class="field">
-        <label>Secondary income</label>
-        <input type="number" id="income-secondary" value="0" min="0" step="100">
-        <span class="hint">Side gig, rental, etc.</span>
+      <div class="contrib-bar-wrap">
+        <div class="contrib-bar-p1" id="contrib-bar-p1" style="width:50%;"></div>
+        <div class="contrib-bar-p2" id="contrib-bar-p2" style="width:50%;"></div>
       </div>
+      <div style="font-size:11.5px;color:var(--text-3);margin-top:4px;" id="contrib-note"></div>
     </div>
   </div>
 
-  <!-- ── Metrics ── -->
+  <!-- metrics -->
   <div class="metrics">
     <div class="metric">
       <div class="metric-label">Total income</div>
       <div class="metric-value" id="m-income">$0</div>
+    </div>
+    <div class="metric" id="m-p1-wrap" style="display:none;">
+      <div class="metric-label" id="m-p1-label">Person 1 income</div>
+      <div class="metric-value" style="color:var(--accent);" id="m-p1">$0</div>
+    </div>
+    <div class="metric" id="m-p2-wrap" style="display:none;">
+      <div class="metric-label" id="m-p2-label">Person 2 income</div>
+      <div class="metric-value" style="color:#7C3AED;" id="m-p2">$0</div>
     </div>
     <div class="metric">
       <div class="metric-label">Total expenses</div>
@@ -124,33 +130,40 @@
     </div>
   </div>
 
-  <!-- ── Status bar ── -->
-  <div id="status-bar" class="income-status surplus" style="margin-bottom:1rem;">
-    Budget status loading...
-  </div>
+  <!-- status -->
+  <div id="status-bar" class="income-status surplus" style="margin-bottom:1rem;">Loading...</div>
 
-  <!-- ── Category toggles ── -->
+  <!-- shared category toggles -->
   <div class="card" style="margin-bottom:1rem;">
-    <div class="card-title">Toggle your spending categories</div>
-    <p style="font-size:13px;color:var(--text-2);margin-bottom:1rem;">Turn on the categories that apply. Each active category gets an input field below.</p>
+    <div class="card-title">Shared spending categories</div>
+    <p style="font-size:13px;color:var(--text-2);margin-bottom:1rem;">One amount covers both people. Use the Personal section below for individual expenses.</p>
     <div id="toggle-container"></div>
   </div>
 
-  <!-- ── Active category inputs ── -->
-  <div class="card" id="inputs-card">
-    <div class="card-title">Monthly amounts</div>
+  <!-- shared inputs -->
+  <div class="card" id="inputs-card" style="margin-bottom:1rem;">
+    <div class="card-title">Shared monthly amounts</div>
     <div id="inputs-container">
-      <p style="font-size:13.5px;color:var(--text-3);font-style:italic;">Enable categories above to enter monthly amounts.</p>
+      <p style="font-size:13.5px;color:var(--text-3);font-style:italic;">Enable categories above to enter amounts.</p>
     </div>
   </div>
 
-  <!-- ── Chart ── -->
+  <!-- personal spending (dual only) -->
+  <div class="card" id="personal-card" style="display:none;margin-bottom:1rem;">
+    <div class="card-title">Personal spending</div>
+    <p style="font-size:13px;color:var(--text-2);margin-bottom:1rem;">Individual expenses tracked separately per person — clothing, fun money, personal care, etc.</p>
+    <div style="margin-bottom:1rem;">
+      <div style="font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:8px;">Track separately for:</div>
+      <div class="toggle-group" id="personal-toggles"></div>
+    </div>
+    <div id="personal-inputs"></div>
+  </div>
+
+  <!-- chart -->
   <div class="card" id="chart-card" style="display:none;">
     <div class="card-title">Spending breakdown</div>
     <div style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:flex-start;">
-      <div style="position:relative;width:220px;height:220px;flex-shrink:0;">
-        <canvas id="budget-chart"></canvas>
-      </div>
+      <div style="position:relative;width:220px;height:220px;flex-shrink:0;"><canvas id="budget-chart"></canvas></div>
       <div id="chart-legend" style="flex:1;min-width:180px;padding-top:8px;"></div>
     </div>
   </div>
@@ -162,193 +175,252 @@
 const $ = id => document.getElementById(id);
 const fmt = n => '$' + Math.round(n).toLocaleString();
 
+let budgetMode = 'single';
+let p1Name = 'Person 1';
+let p2Name = 'Person 2';
+const incomeState = { p1: 5500, p2: 0 };
+
+// ── Mode ──────────────────────────────────────────────────────────────────────
+function setMode(mode) {
+  budgetMode = mode;
+  $('mode-single').classList.toggle('on', mode === 'single');
+  $('mode-dual').classList.toggle('on',   mode === 'dual');
+  buildIncomeFields();
+  buildInputs();
+  buildPersonalSection();
+  recalc();
+}
+
+// ── Income fields ─────────────────────────────────────────────────────────────
+function buildIncomeFields() {
+  const wrap = $('income-fields');
+  if (budgetMode === 'single') {
+    wrap.innerHTML = `
+      <div class="field">
+        <label>Take-home pay (after tax)</label>
+        <input type="number" id="income-p1" value="${incomeState.p1}" min="0" step="100" oninput="onIncomeChange()">
+      </div>
+      <div class="field">
+        <label>Secondary income</label>
+        <input type="number" id="income-p2" value="${incomeState.p2}" min="0" step="100" oninput="onIncomeChange()">
+        <span class="hint">Side gig, rental, etc.</span>
+      </div>`;
+    $('contrib-section').style.display = 'none';
+    $('m-p1-wrap').style.display = 'none';
+    $('m-p2-wrap').style.display = 'none';
+  } else {
+    wrap.innerHTML = `
+      <div class="field">
+        <label><input class="name-input" id="p1-name-input" value="${p1Name}" oninput="p1Name=this.value;updatePersonLabels();"></label>
+        <input type="number" id="income-p1" value="${incomeState.p1}" min="0" step="100" oninput="onIncomeChange()">
+        <span class="hint">Monthly take-home after tax</span>
+      </div>
+      <div class="field">
+        <label><input class="name-input" id="p2-name-input" value="${p2Name}" oninput="p2Name=this.value;updatePersonLabels();"></label>
+        <input type="number" id="income-p2" value="${incomeState.p2}" min="0" step="100" oninput="onIncomeChange()">
+        <span class="hint">Monthly take-home after tax</span>
+      </div>`;
+    $('contrib-section').style.display = '';
+    $('m-p1-wrap').style.display = '';
+    $('m-p2-wrap').style.display = '';
+    updatePersonLabels();
+  }
+}
+
+function updatePersonLabels() {
+  const n1 = p1Name || 'Person 1', n2 = p2Name || 'Person 2';
+  $('m-p1-label').textContent = n1 + ' income';
+  $('m-p2-label').textContent = n2 + ' income';
+  if (budgetMode === 'dual') buildPersonalSection();
+}
+
+function onIncomeChange() {
+  const p1 = $('income-p1'), p2 = $('income-p2');
+  if (p1) incomeState.p1 = parseFloat(p1.value) || 0;
+  if (p2) incomeState.p2 = parseFloat(p2.value) || 0;
+  recalc();
+}
+
 // ── Category definitions ──────────────────────────────────────────────────────
 const CATEGORY_GROUPS = [
-  {
-    group: 'Housing',
-    color: '#1D4ED8',
-    items: [
-      { id: 'rent',        label: 'Rent / Mortgage',      default: 1800, on: true },
-      { id: 'utilities',   label: 'Utilities',             default: 150,  on: true },
-      { id: 'internet',    label: 'Internet',              default: 60,   on: true },
-      { id: 'phone',       label: 'Phone',                 default: 80,   on: true },
-      { id: 'hoa',         label: 'HOA / Condo fees',      default: 0,    on: false },
-      { id: 'home-maint',  label: 'Home maintenance',      default: 100,  on: false },
-    ]
-  },
-  {
-    group: 'Transportation',
-    color: '#7C3AED',
-    items: [
-      { id: 'car-payment', label: 'Car payment',           default: 400,  on: true },
-      { id: 'car-ins',     label: 'Car insurance',         default: 150,  on: true },
-      { id: 'gas',         label: 'Gas / Charging',        default: 200,  on: true },
-      { id: 'parking',     label: 'Parking / Tolls',       default: 0,    on: false },
-      { id: 'transit',     label: 'Public transit',        default: 0,    on: false },
-      { id: 'rideshare',   label: 'Rideshare (Uber/Lyft)', default: 0,    on: false },
-    ]
-  },
-  {
-    group: 'Food & Drink',
-    color: '#059669',
-    items: [
-      { id: 'groceries',   label: 'Groceries',             default: 400,  on: true },
-      { id: 'dining-out',  label: 'Dining out',            default: 200,  on: true },
-      { id: 'coffee',      label: 'Coffee shops',          default: 50,   on: false },
-      { id: 'alcohol',     label: 'Alcohol / bars',        default: 0,    on: false },
-      { id: 'meal-kits',   label: 'Meal kits / delivery',  default: 0,    on: false },
-    ]
-  },
-  {
-    group: 'Health',
-    color: '#DC2626',
-    items: [
-      { id: 'health-ins',  label: 'Health insurance',      default: 200,  on: true },
-      { id: 'dental',      label: 'Dental / Vision',       default: 30,   on: false },
-      { id: 'prescriptions',label:'Prescriptions',         default: 30,   on: false },
-      { id: 'gym',         label: 'Gym / Fitness',         default: 50,   on: false },
-      { id: 'therapy',     label: 'Therapy / Counseling',  default: 0,    on: false },
-    ]
-  },
-  {
-    group: 'Savings & Debt',
-    color: '#B45309',
-    items: [
-      { id: 'emergency',   label: 'Emergency fund',        default: 200,  on: true },
-      { id: 'retirement',  label: 'Retirement / 401(k)',       default: 300,  on: true },
-      { id: 'invest',      label: 'Brokerage / investing', default: 0,    on: false },
-      { id: 'cc-debt',     label: 'Credit card payment',   default: 0,    on: false },
-      { id: 'student-loan',label: 'Student loans',         default: 0,    on: false },
-      { id: 'other-debt',  label: 'Other debt payment',    default: 0,    on: false },
-    ]
-  },
-  {
-    group: 'Lifestyle',
-    color: '#0891B2',
-    items: [
-      { id: 'streaming',   label: 'Streaming / subscriptions', default: 50, on: true },
-      { id: 'clothing',    label: 'Clothing',              default: 100,  on: false },
-      { id: 'personal',    label: 'Personal care / beauty',default: 50,   on: false },
-      { id: 'gifts',       label: 'Gifts / donations',     default: 50,   on: false },
-      { id: 'entertainment',label:'Entertainment',         default: 100,  on: false },
-      { id: 'vacation',    label: 'Vacation / travel',     default: 0,    on: false },
-      { id: 'hobbies',     label: 'Hobbies',               default: 0,    on: false },
-      { id: 'childcare',   label: 'Childcare / school',    default: 0,    on: false },
-      { id: 'pets',        label: 'Pets',                  default: 0,    on: false },
-      { id: 'misc',        label: 'Miscellaneous',         default: 0,    on: false },
-    ]
-  }
+  { group:'Housing', color:'#1D4ED8', items:[
+    { id:'rent',         label:'Rent / Mortgage',       default:1800, on:true  },
+    { id:'utilities',    label:'Utilities',              default:150,  on:true  },
+    { id:'internet',     label:'Internet',               default:60,   on:true  },
+    { id:'phone',        label:'Phone',                  default:80,   on:true  },
+    { id:'hoa',          label:'HOA / Condo fees',       default:0,    on:false },
+    { id:'home-maint',   label:'Home maintenance',       default:100,  on:false },
+  ]},
+  { group:'Transportation', color:'#7C3AED', items:[
+    { id:'car-payment',  label:'Car payment',            default:400,  on:true  },
+    { id:'car-ins',      label:'Car insurance',          default:150,  on:true  },
+    { id:'gas',          label:'Gas / Charging',         default:200,  on:true  },
+    { id:'parking',      label:'Parking / Tolls',        default:0,    on:false },
+    { id:'transit',      label:'Public transit',         default:0,    on:false },
+    { id:'rideshare',    label:'Rideshare (Uber/Lyft)',   default:0,    on:false },
+  ]},
+  { group:'Food & Drink', color:'#059669', items:[
+    { id:'groceries',    label:'Groceries',              default:400,  on:true  },
+    { id:'dining-out',   label:'Dining out',             default:200,  on:true  },
+    { id:'coffee',       label:'Coffee shops',           default:50,   on:false },
+    { id:'alcohol',      label:'Alcohol / bars',         default:0,    on:false },
+    { id:'meal-kits',    label:'Meal kits / delivery',   default:0,    on:false },
+  ]},
+  { group:'Health', color:'#DC2626', items:[
+    { id:'health-ins',   label:'Health insurance',       default:200,  on:true  },
+    { id:'dental',       label:'Dental / Vision',        default:30,   on:false },
+    { id:'prescriptions',label:'Prescriptions',          default:30,   on:false },
+    { id:'gym',          label:'Gym / Fitness',          default:50,   on:false },
+    { id:'therapy',      label:'Therapy / Counseling',   default:0,    on:false },
+  ]},
+  { group:'Savings & Debt', color:'#B45309', items:[
+    { id:'emergency',    label:'Emergency fund',         default:200,  on:true  },
+    { id:'retirement-s', label:'403(b) / 401(k)',        default:300,  on:true  },
+    { id:'invest',       label:'Brokerage / investing',  default:0,    on:false },
+    { id:'cc-debt',      label:'Credit card payment',    default:0,    on:false },
+    { id:'student-loan', label:'Student loans',          default:0,    on:false },
+    { id:'other-debt',   label:'Other debt payment',     default:0,    on:false },
+  ]},
+  { group:'Lifestyle', color:'#0891B2', items:[
+    { id:'streaming',    label:'Streaming / subscriptions', default:50, on:true  },
+    { id:'gifts',        label:'Gifts / donations',      default:50,   on:false },
+    { id:'entertainment',label:'Entertainment',          default:100,  on:false },
+    { id:'vacation',     label:'Vacation / travel',      default:0,    on:false },
+    { id:'childcare',    label:'Childcare / school',     default:0,    on:false },
+    { id:'pets',         label:'Pets',                   default:0,    on:false },
+    { id:'misc',         label:'Miscellaneous',          default:0,    on:false },
+  ]},
+];
+
+const PERSONAL_CATEGORIES = [
+  { id:'p-clothing', label:'Clothing'               },
+  { id:'p-personal', label:'Personal care / beauty' },
+  { id:'p-fun',      label:'Fun money'              },
+  { id:'p-lunch',    label:'Lunches / work food'    },
+  { id:'p-subscr',   label:'Personal subscriptions' },
+  { id:'p-hobbies',  label:'Hobbies'                },
 ];
 
 // ── State ─────────────────────────────────────────────────────────────────────
-const state = {};  // id → { on, value }
+const state = {};
+CATEGORY_GROUPS.forEach(g => g.items.forEach(i => { state[i.id] = { on: i.on, value: i.default }; }));
 
-CATEGORY_GROUPS.forEach(g => g.items.forEach(item => {
-  state[item.id] = { on: item.on, value: item.default };
-}));
+const personalState = {};
+PERSONAL_CATEGORIES.forEach(i => { personalState[i.id] = { on: false, p1: 0, p2: 0 }; });
 
-// ── Build toggle UI ────────────────────────────────────────────────────────────
+// ── Toggles ───────────────────────────────────────────────────────────────────
 function buildToggles() {
   const container = $('toggle-container');
   container.innerHTML = '';
   CATEGORY_GROUPS.forEach(g => {
-    const section = document.createElement('div');
-    section.className = 'category-section';
-    const title = document.createElement('div');
-    title.className = 'category-section-title';
-    title.textContent = g.group;
-    section.appendChild(title);
-
-    const pills = document.createElement('div');
-    pills.className = 'toggle-group';
-
+    const sec = document.createElement('div'); sec.className = 'category-section';
+    const t = document.createElement('div'); t.className = 'category-section-title'; t.textContent = g.group;
+    sec.appendChild(t);
+    const pills = document.createElement('div'); pills.className = 'toggle-group';
     g.items.forEach(item => {
       const btn = document.createElement('button');
       btn.className = 'toggle-pill' + (state[item.id].on ? ' on' : '');
       btn.textContent = item.label;
-      btn.dataset.id = item.id;
-      btn.onclick = () => {
-        state[item.id].on = !state[item.id].on;
-        btn.classList.toggle('on', state[item.id].on);
-        buildInputs();
-        recalc();
-      };
+      btn.onclick = () => { state[item.id].on = !state[item.id].on; btn.classList.toggle('on', state[item.id].on); buildInputs(); recalc(); };
       pills.appendChild(btn);
     });
-    section.appendChild(pills);
-    container.appendChild(section);
+    sec.appendChild(pills); container.appendChild(sec);
   });
 }
 
-// ── Build inputs for active categories ────────────────────────────────────────
+// ── Shared inputs ─────────────────────────────────────────────────────────────
 function buildInputs() {
   const container = $('inputs-container');
   container.innerHTML = '';
-
   let hasAny = false;
   CATEGORY_GROUPS.forEach(g => {
     const active = g.items.filter(i => state[i.id].on);
-    if (active.length === 0) return;
+    if (!active.length) return;
     hasAny = true;
-
-    const section = document.createElement('div');
-    section.className = 'category-section';
-    const title = document.createElement('div');
-    title.className = 'category-section-title';
-    title.style.color = g.color;
-    title.textContent = g.group;
-    section.appendChild(title);
-
+    const sec = document.createElement('div'); sec.className = 'category-section';
+    const t = document.createElement('div'); t.className = 'category-section-title'; t.style.color = g.color; t.textContent = g.group;
+    sec.appendChild(t);
     active.forEach(item => {
-      const row = document.createElement('div');
-      row.className = 'budget-row';
-
-      const label = document.createElement('div');
-      label.className = 'budget-row-label';
-      label.textContent = item.label;
-
-      const input = document.createElement('input');
-      input.type = 'number';
-      input.className = 'budget-row-input';
-      input.min = '0';
-      input.step = '10';
-      input.value = state[item.id].value;
-      input.dataset.id = item.id;
-      input.addEventListener('input', () => {
-        state[item.id].value = parseFloat(input.value) || 0;
-        recalc();
-      });
-
-      const pct = document.createElement('div');
-      pct.className = 'budget-row-pct';
-      pct.id = 'pct-' + item.id;
-
-      row.appendChild(label);
-      row.appendChild(input);
-      row.appendChild(pct);
-      section.appendChild(row);
+      const row = document.createElement('div'); row.className = 'budget-row';
+      const lbl = document.createElement('div'); lbl.className = 'budget-row-label'; lbl.textContent = item.label;
+      const inp = document.createElement('input');
+      inp.type = 'number'; inp.className = 'budget-row-input'; inp.min = '0'; inp.step = '10'; inp.value = state[item.id].value;
+      inp.addEventListener('input', () => { state[item.id].value = parseFloat(inp.value) || 0; recalc(); });
+      const pct = document.createElement('div'); pct.className = 'budget-row-pct'; pct.id = 'pct-' + item.id;
+      row.appendChild(lbl); row.appendChild(inp); row.appendChild(pct); sec.appendChild(row);
     });
-
-    container.appendChild(section);
+    container.appendChild(sec);
   });
-
-  if (!hasAny) {
-    container.innerHTML = '<p style="font-size:13.5px;color:var(--text-3);font-style:italic;">Enable categories above to enter monthly amounts.</p>';
-  }
+  if (!hasAny) container.innerHTML = '<p style="font-size:13.5px;color:var(--text-3);font-style:italic;">Enable categories above to enter amounts.</p>';
 }
 
-// ── Chart ─────────────────────────────────────────────────────────────────────
+// ── Personal section ──────────────────────────────────────────────────────────
+function buildPersonalSection() {
+  const card = $('personal-card');
+  if (budgetMode === 'single') { card.style.display = 'none'; return; }
+  card.style.display = '';
+  const n1 = p1Name || 'Person 1', n2 = p2Name || 'Person 2';
+
+  const tw = $('personal-toggles'); tw.innerHTML = '';
+  PERSONAL_CATEGORIES.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'toggle-pill' + (personalState[item.id].on ? ' on' : '');
+    btn.textContent = item.label;
+    btn.onclick = () => { personalState[item.id].on = !personalState[item.id].on; btn.classList.toggle('on', personalState[item.id].on); buildPersonalInputs(n1, n2); recalc(); };
+    tw.appendChild(btn);
+  });
+  buildPersonalInputs(n1, n2);
+}
+
+function buildPersonalInputs(n1, n2) {
+  const container = $('personal-inputs');
+  const active = PERSONAL_CATEGORIES.filter(i => personalState[i.id].on);
+  if (!active.length) {
+    container.innerHTML = '<p style="font-size:13px;color:var(--text-3);font-style:italic;margin-top:0.5rem;">Toggle items above to track personal spending per person.</p>';
+    return;
+  }
+  container.innerHTML = `
+    <div class="personal-grid">
+      <div>
+        <div class="personal-col-header" style="color:var(--accent);">${n1}</div>
+        <div id="personal-col-p1"></div>
+      </div>
+      <div>
+        <div class="personal-col-header" style="color:#7C3AED;">${n2}</div>
+        <div id="personal-col-p2"></div>
+      </div>
+    </div>`;
+  ['p1','p2'].forEach(person => {
+    const col = document.getElementById('personal-col-' + person);
+    active.forEach(item => {
+      const row = document.createElement('div'); row.className = 'personal-row';
+      const lbl = document.createElement('span'); lbl.textContent = item.label;
+      const inp = document.createElement('input'); inp.type = 'number'; inp.min = '0'; inp.step = '10'; inp.value = personalState[item.id][person];
+      inp.addEventListener('input', () => { personalState[item.id][person] = parseFloat(inp.value) || 0; recalc(); });
+      row.appendChild(lbl); row.appendChild(inp); col.appendChild(row);
+    });
+  });
+}
+
+// ── Recalc ────────────────────────────────────────────────────────────────────
 let chart;
 
 function recalc() {
-  const income = (parseFloat($('income-main').value) || 0) + (parseFloat($('income-secondary').value) || 0);
+  const p1el = $('income-p1'), p2el = $('income-p2');
+  if (p1el) incomeState.p1 = parseFloat(p1el.value) || 0;
+  if (p2el) incomeState.p2 = parseFloat(p2el.value) || 0;
+  const income = incomeState.p1 + incomeState.p2;
 
-  // build group totals for chart
   const groupTotals = CATEGORY_GROUPS.map(g => ({
-    group: g.group,
-    color: g.color,
-    total: g.items.filter(i => state[i.id].on).reduce((sum, i) => sum + state[i.id].value, 0)
+    group: g.group, color: g.color,
+    total: g.items.filter(i => state[i.id].on).reduce((s, i) => s + state[i.id].value, 0)
   })).filter(g => g.total > 0);
+
+  if (budgetMode === 'dual') {
+    const pTotal = PERSONAL_CATEGORIES.filter(i => personalState[i.id].on)
+      .reduce((s, i) => s + personalState[i.id].p1 + personalState[i.id].p2, 0);
+    if (pTotal > 0) groupTotals.push({ group: 'Personal', color: '#EC4899', total: pTotal });
+  }
 
   const totalExpenses = groupTotals.reduce((s, g) => s + g.total, 0);
   const remaining     = income - totalExpenses;
@@ -360,149 +432,109 @@ function recalc() {
   $('m-remaining').className      = 'metric-value ' + (remaining >= 0 ? 'green' : 'red');
   $('m-savings-rate').textContent = savingsRate + '%';
 
+  if (budgetMode === 'dual') {
+    $('m-p1').textContent = fmt(incomeState.p1);
+    $('m-p2').textContent = fmt(incomeState.p2);
+    if (income > 0) {
+      const p1pct = Math.round((incomeState.p1 / income) * 100);
+      $('contrib-bar-p1').style.width = p1pct + '%';
+      $('contrib-bar-p2').style.width = (100 - p1pct) + '%';
+      const n1 = p1Name || 'Person 1', n2 = p2Name || 'Person 2';
+      $('contrib-p1-label').textContent = n1 + ' — ' + p1pct + '%';
+      $('contrib-p2-label').textContent = n2 + ' — ' + (100 - p1pct) + '%';
+      $('contrib-note').textContent = n1 + ' brings in ' + fmt(incomeState.p1) + ' and ' + n2 + ' brings in ' + fmt(incomeState.p2) + ' for a combined ' + fmt(income) + '.';
+    }
+  }
+
   const bar = $('status-bar');
+  const who = budgetMode === 'dual' ? 'your household is' : "you're";
   if (remaining > 50) {
     bar.className = 'income-status surplus';
-    bar.textContent = '✓ Surplus of ' + fmt(remaining) + ' — you\'re spending less than you earn.';
+    bar.textContent = '✓ Surplus of ' + fmt(remaining) + ' — ' + who + ' spending less than you earn.';
   } else if (remaining < -50) {
     bar.className = 'income-status deficit';
     bar.textContent = '⚠ Deficit of ' + fmt(Math.abs(remaining)) + ' — expenses exceed income.';
   } else {
     bar.className = 'income-status balanced';
-    bar.textContent = '≈ Roughly balanced — within $50 of your income.';
+    bar.textContent = '≈ Roughly balanced — within $50 of income.';
   }
 
-  // update % labels
   CATEGORY_GROUPS.forEach(g => g.items.forEach(item => {
     const el = $('pct-' + item.id);
-    if (el && income > 0) {
-      el.textContent = Math.round((state[item.id].value / income) * 100) + '%';
-    }
+    if (el && income > 0) el.textContent = Math.round((state[item.id].value / income) * 100) + '%';
   }));
 
-  // chart
   if (groupTotals.length > 0) {
     $('chart-card').style.display = '';
     const ctx = $('budget-chart').getContext('2d');
     if (chart) chart.destroy();
     chart = new Chart(ctx, {
       type: 'doughnut',
-      data: {
-        labels: groupTotals.map(g => g.group),
-        datasets: [{
-          data: groupTotals.map(g => g.total),
-          backgroundColor: groupTotals.map(g => g.color),
-          borderWidth: 2,
-          borderColor: '#FAFAF7',
-          hoverOffset: 6
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '62%',
-        plugins: {
-          legend: { display: false },
-          tooltip: { callbacks: {
-            label: c => '  ' + fmt(c.raw) + ' (' + Math.round((c.raw/totalExpenses)*100) + '%)'
-          }}
-        }
-      }
+      data: { labels: groupTotals.map(g => g.group), datasets: [{ data: groupTotals.map(g => g.total), backgroundColor: groupTotals.map(g => g.color), borderWidth: 2, borderColor: '#FAFAF7', hoverOffset: 6 }] },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => '  ' + fmt(c.raw) + ' (' + Math.round((c.raw / totalExpenses) * 100) + '%)' } } } }
     });
-
-    // custom legend
-    const legendEl = $('chart-legend');
-    legendEl.innerHTML = '';
+    const legendEl = $('chart-legend'); legendEl.innerHTML = '';
     groupTotals.forEach(g => {
       const pct = income > 0 ? Math.round((g.total / income) * 100) : 0;
-      const row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px;';
-      row.innerHTML = `
-        <span style="width:10px;height:10px;border-radius:2px;background:${g.color};flex-shrink:0;"></span>
-        <span style="flex:1;font-size:13px;color:var(--text)">${g.group}</span>
-        <span style="font-family:var(--font-mono);font-size:12.5px;color:var(--text-2)">${fmt(g.total)}</span>
-        <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-3);min-width:32px;text-align:right">${pct}%</span>
-      `;
+      const row = document.createElement('div'); row.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px;';
+      row.innerHTML = `<span style="width:10px;height:10px;border-radius:2px;background:${g.color};flex-shrink:0;"></span><span style="flex:1;font-size:13px;color:var(--text)">${g.group}</span><span style="font-family:var(--font-mono);font-size:12.5px;color:var(--text-2)">${fmt(g.total)}</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-3);min-width:32px;text-align:right">${pct}%</span>`;
       legendEl.appendChild(row);
     });
     if (remaining > 0) {
-      const row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;gap:8px;margin-top:4px;padding-top:8px;border-top:1px solid var(--border)';
-      const pct = income > 0 ? Math.round((remaining/income)*100) : 0;
-      row.innerHTML = `
-        <span style="width:10px;height:10px;border-radius:2px;background:#D1FAE5;border:1px solid #6EE7B7;flex-shrink:0;"></span>
-        <span style="flex:1;font-size:13px;color:var(--text)">Remaining</span>
-        <span style="font-family:var(--font-mono);font-size:12.5px;color:var(--green)">${fmt(remaining)}</span>
-        <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-3);min-width:32px;text-align:right">${pct}%</span>
-      `;
+      const pct = income > 0 ? Math.round((remaining / income) * 100) : 0;
+      const row = document.createElement('div'); row.style.cssText = 'display:flex;align-items:center;gap:8px;margin-top:4px;padding-top:8px;border-top:1px solid var(--border)';
+      row.innerHTML = `<span style="width:10px;height:10px;border-radius:2px;background:#D1FAE5;border:1px solid #6EE7B7;flex-shrink:0;"></span><span style="flex:1;font-size:13px;color:var(--text)">Remaining</span><span style="font-family:var(--font-mono);font-size:12.5px;color:var(--green)">${fmt(remaining)}</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-3);min-width:32px;text-align:right">${pct}%</span>`;
       legendEl.appendChild(row);
     }
-  } else {
-    $('chart-card').style.display = 'none';
-  }
+  } else { $('chart-card').style.display = 'none'; }
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
+buildIncomeFields();
 buildToggles();
 buildInputs();
+buildPersonalSection();
 recalc();
-
-document.querySelectorAll('#income-main, #income-secondary').forEach(el => {
-  el.addEventListener('input', recalc);
-});
 </script>
 
 <script type="module">
 import { saveInputs, loadWhenReady, flashSaved } from "./userdata.js";
-
 const TOOL = "budget";
 
-// Load saved budget state
 loadWhenReady(TOOL, data => {
   if (!data) return;
+  if (data.budgetMode) budgetMode = data.budgetMode;
+  if (data.p1Name) p1Name = data.p1Name;
+  if (data.p2Name) p2Name = data.p2Name;
+  if (data.incomeP1 !== undefined) incomeState.p1 = data.incomeP1;
+  if (data.incomeP2 !== undefined) incomeState.p2 = data.incomeP2;
+  if (data.categories) Object.entries(data.categories).forEach(([id, v]) => { if (state[id]) { state[id].on = v.on; state[id].value = v.value; } });
+  if (data.personal)   Object.entries(data.personal).forEach(([id, v])   => { if (personalState[id]) Object.assign(personalState[id], v); });
 
-  // restore income
-  if (data.incomeMain !== undefined) document.getElementById('income-main').value = data.incomeMain;
-  if (data.incomeSecondary !== undefined) document.getElementById('income-secondary').value = data.incomeSecondary;
-
-  // restore category state
-  if (data.categories) {
-    Object.entries(data.categories).forEach(([id, val]) => {
-      if (state[id] !== undefined) {
-        state[id].on    = val.on;
-        state[id].value = val.value;
-      }
-    });
-  }
-
-  // rebuild UI with loaded state
-  buildToggles();
-  buildInputs();
-  recalc();
+  $('mode-single').classList.toggle('on', budgetMode === 'single');
+  $('mode-dual').classList.toggle('on',   budgetMode === 'dual');
+  buildIncomeFields(); buildToggles(); buildInputs(); buildPersonalSection(); recalc();
 });
 
-// Auto-save
 let saveTimer;
 function scheduleSave() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async () => {
-    const categories = {};
-    Object.entries(state).forEach(([id, val]) => { categories[id] = { on: val.on, value: val.value }; });
+    const categories = {}, personal = {};
+    Object.entries(state).forEach(([id, v]) => { categories[id] = { on: v.on, value: v.value }; });
+    Object.entries(personalState).forEach(([id, v]) => { personal[id] = { on: v.on, p1: v.p1, p2: v.p2 }; });
+    const p1el = document.getElementById('income-p1'), p2el = document.getElementById('income-p2');
     await saveInputs(TOOL, {
-      incomeMain:      parseFloat(document.getElementById('income-main').value) || 0,
-      incomeSecondary: parseFloat(document.getElementById('income-secondary').value) || 0,
-      categories
+      budgetMode, p1Name, p2Name,
+      incomeP1: p1el ? parseFloat(p1el.value) || 0 : incomeState.p1,
+      incomeP2: p2el ? parseFloat(p2el.value) || 0 : incomeState.p2,
+      categories, personal
     });
     flashSaved();
   }, 1000);
 }
-
-// Hook into state changes — patch toggle and input listeners to also save
 document.addEventListener('input', scheduleSave);
-// Also save when toggles are clicked (they don't fire 'input')
-document.addEventListener('click', e => {
-  if (e.target.classList.contains('toggle-pill')) scheduleSave();
-});
+document.addEventListener('click', e => { if (e.target.classList.contains('toggle-pill')) scheduleSave(); });
 </script>
 </body>
 </html>
