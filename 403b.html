@@ -89,19 +89,10 @@
       <div class="field">
         <label>Employer match rate</label>
         <div class="slider-row">
-          <input type="range" id="match-pct" min="0" max="15" step="0.5" value="3" oninput="syncSlider('match-pct','match-pct-val','%')">
-          <span class="slider-val" id="match-pct-val">3%</span>
+          <input type="range" id="match-pct" min="0" max="20" step="0.5" value="10" oninput="syncSlider('match-pct','match-pct-val','%')">
+          <span class="slider-val" id="match-pct-val">10%</span>
         </div>
-        <span class="hint">% of eligible contribution matched (100% = dollar-for-dollar)</span>
-      </div>
-
-      <div class="field">
-        <label>Employer match cap</label>
-        <div class="slider-row">
-          <input type="range" id="match-cap" min="0" max="15" step="0.5" value="6" oninput="syncSlider('match-cap','match-cap-val','%')">
-          <span class="slider-val" id="match-cap-val">6%</span>
-        </div>
-        <span class="hint">Match only applies to your contributions up to this % of salary</span>
+        <span class="hint">% of your annual salary contributed by your employer each year</span>
       </div>
 
     </div>
@@ -292,7 +283,6 @@ function recalc() {
   const contribPct   = get('contrib-pct') / 100;
   const extraMonthly = get('extra-monthly');
   const matchPct     = get('match-pct') / 100;
-  const matchCap     = get('match-cap') / 100;
   const returnRate   = get('return-rate') / 100;
   const salaryGrowth = get('salary-growth') / 100;
   const inflation    = get('inflation') / 100;
@@ -318,12 +308,8 @@ function recalc() {
 
     // year-start contributions
     const yourContrib = salary * contribPct + extraMonthly * 12;
-    // Employer match: they match (matchPct) of your contribution,
-    // but only on up to (matchCap) of your salary.
-    // e.g. 100% match up to 10% of salary -> actualMatch = salary * 10%
-    //      50% match up to 6% of salary   -> actualMatch = salary * 3%
-    const eligibleContrib = Math.min(salary * contribPct, salary * matchCap);
-    const actualMatch = eligibleContrib * matchPct;
+    // Employer match: flat % of annual salary, independent of your contribution
+    const actualMatch = salary * matchPct;
 
     // add contributions at year start (simplified: mid-year)
     const totalAdded = yourContrib + actualMatch;
@@ -385,7 +371,7 @@ import { saveInputs, loadWhenReady, flashSaved } from "./userdata.js";
 
 const TOOL = "403b";
 const INPUT_IDS = ['current-bal','current-age','retire-age','salary','contrib-pct',
-                   'extra-monthly','match-pct','match-cap','return-rate','salary-growth','inflation'];
+                   'extra-monthly','match-pct','return-rate','salary-growth','inflation'];
 
 // Load saved inputs when auth resolves
 loadWhenReady(TOOL, data => {
@@ -398,7 +384,6 @@ loadWhenReady(TOOL, data => {
       const labelMap = {
         'contrib-pct': ['contrib-pct-val','%'],
         'match-pct':   ['match-pct-val','%'],
-        'match-cap':   ['match-cap-val','%'],
         'return-rate': ['return-rate-val','%'],
         'salary-growth':['salary-growth-val','%'],
         'inflation':   ['inflation-val','%'],
