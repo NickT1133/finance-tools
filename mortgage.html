@@ -17,6 +17,88 @@
     <p>Monthly payment, total interest, amortization schedule, and payoff comparison with extra payments or biweekly payments.</p>
   </div>
 
+  <!-- ── Pre-qualification estimator ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;" onclick="togglePrequal()">
+      <div>
+        <div class="card-title" style="margin-bottom:2px;">How much can I afford?</div>
+        <div style="font-size:13px;color:var(--text-2);">Estimate your max approval based on income and debts</div>
+      </div>
+      <span id="prequal-chevron" style="font-size:18px;color:var(--text-3);transition:transform 0.2s;">▼</span>
+    </div>
+
+    <div id="prequal-body" style="display:none;margin-top:1.25rem;">
+
+      <div class="field-grid" style="margin-bottom:1.25rem;">
+
+        <div class="field">
+          <label>Annual household income ($)</label>
+          <input type="number" id="pq-income" value="120000" min="0" step="1000" oninput="calcPrequal()">
+          <span class="hint">Combined gross income before taxes</span>
+        </div>
+
+        <div class="field">
+          <label>Monthly debts ($)</label>
+          <input type="number" id="pq-debts" value="500" min="0" step="50" oninput="calcPrequal()">
+          <span class="hint">Car payments, student loans, credit cards, etc.</span>
+        </div>
+
+        <div class="field">
+          <label>Down payment ($)</label>
+          <input type="number" id="pq-down" value="80000" min="0" step="1000" oninput="calcPrequal()">
+          <span class="hint">Cash available for down payment</span>
+        </div>
+
+        <div class="field">
+          <label>Interest rate</label>
+          <div class="slider-row">
+            <input type="range" id="pq-rate" min="2" max="12" step="0.05" value="6.75" oninput="syncSlider('pq-rate','pq-rate-val','%'); calcPrequal()">
+            <span class="slider-val" id="pq-rate-val">6.75%</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Results -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:1.25rem;">
+        <div class="metric">
+          <div class="metric-label">Est. max home price</div>
+          <div class="metric-value green" id="pq-max-price">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Max loan amount</div>
+          <div class="metric-value" id="pq-max-loan">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Est. monthly payment</div>
+          <div class="metric-value" id="pq-monthly">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Your DTI ratio</div>
+          <div class="metric-value" id="pq-dti">—</div>
+        </div>
+      </div>
+
+      <!-- DTI bar -->
+      <div style="margin-bottom:0.75rem;">
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-3);margin-bottom:4px;">
+          <span>Debt-to-income ratio</span>
+          <span>43% = lender max &nbsp;|&nbsp; 28% = ideal front-end</span>
+        </div>
+        <div style="height:8px;background:var(--bg-inset);border-radius:99px;overflow:hidden;">
+          <div id="pq-dti-bar" style="height:100%;border-radius:99px;transition:width 0.3s,background 0.3s;width:0%;background:var(--green);"></div>
+        </div>
+      </div>
+
+      <div id="pq-note" style="font-size:12.5px;color:var(--text-2);padding:10px 12px;background:var(--bg-inset);border-radius:var(--radius);"></div>
+
+      <button onclick="applyToCalc()" style="margin-top:1rem;height:36px;padding:0 16px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);font-family:var(--font-body);font-size:13px;font-weight:500;cursor:pointer;">
+        Use these numbers in the calculator ↓
+      </button>
+
+    </div>
+  </div>
+
   <!-- ── Metrics ── -->
   <div class="metrics">
     <div class="metric">
@@ -177,6 +259,95 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
+
+// ── Pre-qualification calculator ──────────────────────────────────────────────
+function togglePrequal() {
+  const body = $('prequal-body');
+  const chevron = $('prequal-chevron');
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : '';
+  chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+  if (!isOpen) calcPrequal();
+}
+
+function calcPrequal() {
+  const grossIncome   = get('pq-income');
+  const monthlyDebts  = get('pq-debts');
+  const downPayment   = get('pq-down');
+  const annRate       = get('pq-rate') / 100;
+  const monthRate     = annRate / 12;
+  const termMonths    = 360; // assume 30yr for estimation
+
+  if (grossIncome <= 0) return;
+
+  const monthlyIncome = grossIncome / 12;
+
+  // Lenders use two DTI limits:
+  // Front-end: housing costs <= 28% of gross monthly income
+  // Back-end:  all debts <= 43% of gross monthly income
+  const maxFrontEnd  = monthlyIncome * 0.28;
+  const maxBackEnd   = monthlyIncome * 0.43 - monthlyDebts;
+  const maxPayment   = Math.max(0, Math.min(maxFrontEnd, maxBackEnd));
+
+  // Work backwards from max payment to max loan principal
+  // P = payment * (1 - (1+r)^-n) / r
+  const maxLoan = monthRate > 0
+    ? maxPayment * (1 - Math.pow(1 + monthRate, -termMonths)) / monthRate
+    : maxPayment * termMonths;
+
+  const maxHomePrice = maxLoan + downPayment;
+
+  // Current DTI with existing debts (no mortgage yet)
+  const currentDTI = (monthlyDebts / monthlyIncome) * 100;
+  // DTI if they take max mortgage
+  const fullDTI = ((monthlyDebts + maxPayment) / monthlyIncome) * 100;
+
+  $('pq-max-price').textContent = maxHomePrice > 0 ? fmt(maxHomePrice) : '—';
+  $('pq-max-loan').textContent  = maxLoan > 0      ? fmt(maxLoan)      : '—';
+  $('pq-monthly').textContent   = maxPayment > 0   ? fmt(maxPayment)   : '—';
+  $('pq-dti').textContent       = fullDTI.toFixed(1) + '%';
+
+  // DTI bar color
+  const bar = $('pq-dti-bar');
+  const barPct = Math.min(fullDTI, 100);
+  bar.style.width = barPct + '%';
+  bar.style.background = fullDTI <= 28 ? '#15803D' : fullDTI <= 36 ? '#B45309' : '#B91C1C';
+
+  // Guidance note
+  const note = $('pq-note');
+  if (maxPayment <= 0) {
+    note.textContent = 'Your current debts already exceed the 43% DTI limit. Paying down existing debt will increase your approval amount.';
+    note.style.color = 'var(--red)';
+  } else if (fullDTI <= 28) {
+    note.textContent = `Strong position — your DTI of ${fullDTI.toFixed(1)}% is well within the ideal 28% front-end limit. You may qualify for better rates.`;
+    note.style.color = 'var(--green)';
+  } else if (fullDTI <= 36) {
+    note.textContent = `Good position — DTI of ${fullDTI.toFixed(1)}% is acceptable to most lenders. Reducing monthly debts could improve your terms.`;
+    note.style.color = 'var(--amber)';
+  } else {
+    note.textContent = `DTI of ${fullDTI.toFixed(1)}% is at the high end. Most lenders cap at 43%. You may qualify, but paying down debts first would help.`;
+    note.style.color = 'var(--red)';
+  }
+}
+
+function applyToCalc() {
+  const price = get('pq-max-price') || 0;
+  const down  = get('pq-down');
+  const rate  = get('pq-rate');
+
+  // read the computed values from the metric display and push to main calc
+  const maxPrice = parseFloat($('pq-max-price').textContent.replace(/[$,]/g,'')) || 0;
+  if (maxPrice > 0) {
+    $('home-price').value   = maxPrice;
+    $('down-payment').value = down;
+    $('mortgage-rate').value = rate;
+    $('mortgage-rate-val').textContent = rate + '%';
+    recalc();
+    // scroll down to main calc
+    document.querySelector('.metrics').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
 const $ = id => document.getElementById(id);
 const fmt = n => '$' + Math.round(n).toLocaleString();
 const fmtK = n => n >= 1e6 ? '$' + (n/1e6).toFixed(2)+'M' : '$' + Math.round(n/1000)+'k';
