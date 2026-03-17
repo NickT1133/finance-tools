@@ -381,9 +381,201 @@ body {
   color: var(--text-3);
 }
 
-/* ── Responsive ──────────────────────────────────── */
-@media (max-width: 600px) {
-  #site-nav { padding: 0 1rem; gap: 1rem; }
-  .page-wrap { padding: 1.5rem 1rem 3rem; }
-  .field-grid { grid-template-columns: 1fr; }
+/* ── Responsive — mobile-first improvements ─────── */
+
+/* ── Nav hamburger logic ─────────────────────────── */
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: auto;
+  border-radius: var(--radius);
+}
+
+.nav-toggle span {
+  display: block;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+
+.nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-toggle.open span:nth-child(2) { opacity: 0; }
+.nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+@media (max-width: 680px) {
+  /* Nav */
+  #site-nav {
+    padding: 0 1rem;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    height: auto;
+    min-height: var(--nav-h);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .nav-brand {
+    font-size: 16px;
+    flex: 1;
+  }
+
+  .nav-toggle {
+    display: flex;
+  }
+
+  .nav-links {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0.5rem 0 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .nav-links a {
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: var(--radius);
+  }
+
+  /* Page shell */
+  .page-wrap {
+    padding: 1.25rem 1rem 3rem;
+  }
+
+  .page-header {
+    margin-bottom: 1.25rem;
+  }
+
+  .page-header h1 {
+    font-size: clamp(24px, 6vw, 32px);
+  }
+
+  /* Metrics — 2 columns on mobile, numbers readable */
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .metric {
+    padding: 0.7rem 0.85rem;
+  }
+
+  .metric-value {
+    font-size: 17px;
+  }
+
+  .metric-label {
+    font-size: 11px;
+  }
+
+  /* Cards */
+  .card {
+    padding: 1.1rem 1rem;
+  }
+
+  /* Field grid already collapses to 1col — just tighten gap */
+  .field-grid {
+    gap: 0.75rem;
+  }
+
+  .field input,
+  .field select {
+    height: 42px; /* Larger tap target on mobile */
+    font-size: 16px; /* Prevents iOS zoom-on-focus */
+  }
+
+  /* Slider rows — label + slider + value readable */
+  .slider-row {
+    gap: 8px;
+  }
+
+  .slider-row input[type=range] {
+    min-width: 0;
+  }
+
+  .slider-row .slider-val {
+    min-width: 48px;
+    font-size: 12.5px;
+  }
+
+  /* Toggle pills — wrap freely, slightly larger tap target */
+  .toggle-group {
+    gap: 5px;
+  }
+
+  .toggle-pill {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+
+  /* Tool grid — homepage cards stack to 1 col below 480px */
+  .tool-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .tool-card {
+    padding: 1rem 1.1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .tool-card-icon {
+    font-size: 20px;
+    margin-bottom: 0;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .tool-card-title {
+    font-size: 16px;
+    margin-bottom: 2px;
+  }
+
+  /* Schedule table — smaller text and padding on mobile */
+  .schedule-table {
+    font-size: 11.5px;
+  }
+
+  .schedule-table th,
+  .schedule-table td {
+    padding: 6px 8px;
+  }
+
+  /* Legend — tighter on mobile */
+  .legend {
+    gap: 10px;
+  }
+
+  .legend-item {
+    font-size: 11.5px;
+  }
+}
+
+/* Very narrow phones (< 380px) */
+@media (max-width: 380px) {
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-value {
+    font-size: 20px;
+  }
 }
